@@ -94,8 +94,11 @@ li .pts { width: 2.6em; flex: none; text-align: right; font-weight: 700; }
       <input type="date" name="date" required min="1900-01-01" max="2099-12-31">
       <select name="calendar" aria-label="달력" style="flex:none;width:8.5em"><option value="solar">양력</option><option value="lunar">음력</option><option value="leap">음력 윤달</option></select>
     </div>
-    <label>태어난 시각 <small>(모르면 비워 두기)</small></label>
-    <input type="time" name="time">
+    <label>태어난 시각</label>
+    <div class="row">
+      <select name="hour" aria-label="시"><option value="">모름</option></select>
+      <select name="minute" aria-label="분"></select>
+    </div>
     <div class="row">
       <div><label>출생지</label><select name="place"></select></div>
       <div><label>MBTI</label><select name="mbti"><option value="">모름</option></select></div>
@@ -228,11 +231,16 @@ list.addEventListener('click', async e => {
 for (const p of Object.keys(Saju.PLACES)) join.place.add(new Option(p, p));
 join.place.add(new Option('해외·모름', '모름'));
 for (const m of MBTI) join.mbti.add(new Option(m));
+for (let h = 0; h < 24; h++) join.hour.add(new Option(`${h < 12 ? '오전' : '오후'} ${h % 12 || 12}시${h === 0 ? ' (밤 12시)' : h === 12 ? ' (낮 12시)' : ''}`, h));
+for (let m = 0; m < 60; m++) join.minute.add(new Option(`${m}분`, String(m).padStart(2, '0')));
+const syncMinute = () => join.minute.disabled = !join.hour.value;
+join.hour.addEventListener('change', syncMinute); syncMinute();
 join.gender.addEventListener('change', () => join.want.value = join.gender.value === 'M' ? 'F' : 'M');
 
 join.addEventListener('submit', async e => {
   e.preventDefault();
   const btn = join.querySelector('button'), v = Object.fromEntries(new FormData(join));
+  v.time = v.hour ? `${v.hour}:${v.minute}` : '';
   btn.disabled = true;
   try {
     const saju = Saju.calc(v), packed = Saju.pack(saju);
