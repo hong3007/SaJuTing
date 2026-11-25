@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SaJuTeeing</title>
+<meta name="description" content="사주팔자와 MBTI로 보는 궁합 (베타)">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3CclipPath id='c'%3E%3Ccircle cx='25' cy='32' r='13'/%3E%3C/clipPath%3E%3Crect width='64' height='64' rx='14' fill='%232b1638'/%3E%3Ccircle cx='25' cy='32' r='13' fill='%23f5b942'/%3E%3Ccircle cx='39' cy='32' r='13' fill='%23ff5d8f'/%3E%3Ccircle cx='39' cy='32' r='13' fill='%23fff' clip-path='url(%23c)'/%3E%3C/svg%3E">
+<link rel="icon" type="image/png" sizes="192x192" href="data:image/png;base64,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">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<style>
+:root {
+  --bg: #faf7fc; --card: #fff; --text: #21162a; --muted: #6f6478; --line: #e7deee; --accent: #e0457b; --accent-text: #fff;
+  --wood: #2f8f55; --fire: #d9434b; --earth: #b98a22; --metal: #7c808c; --water: #2c5aa0; --plus: #1f8a4c; --minus: #c23b47;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #17101d; --card: #221829; --text: #f1eaf5; --muted: #a99bb3; --line: #3a2d44; --accent: #ff5d8f; --accent-text: #1b0f20;
+  --plus: #5fd08f; --minus: #ff7a84;
+} }
+:root[data-theme="dark"] {
+  --bg: #17101d; --card: #221829; --text: #f1eaf5; --muted: #a99bb3; --line: #3a2d44; --accent: #ff5d8f; --accent-text: #1b0f20;
+  --plus: #5fd08f; --minus: #ff7a84;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
+main { max-width: 760px; margin: 0 auto; padding: 16px; }
+header { display: flex; align-items: center; gap: 10px; margin: 4px 0 16px; }
+header img { width: 36px; height: 36px; }
+header h1 { font-size: 20px; margin: 0; }
+header small { color: var(--muted); }
+.people { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 560px) { .people { grid-template-columns: 1fr; } }
+fieldset { border: 1px solid var(--line); border-radius: 14px; background: var(--card); padding: 12px 14px 14px; margin: 0; min-width: 0; }
+legend { font-weight: 700; padding: 0 6px; }
+label { display: block; font-size: 13px; color: var(--muted); margin-top: 10px; }
+.row { display: flex; gap: 6px; }
+input, select, button { font: inherit; color: var(--text); }
+input, select { width: 100%; min-width: 0; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.row select { width: 8.5em; flex: none; }
+button { display: block; width: 100%; margin: 16px 0; padding: 13px; border: 0; border-radius: 12px; background: var(--accent); color: var(--accent-text); font-weight: 700; font-size: 16px; cursor: pointer; }
+.error { color: var(--minus); font-weight: 600; }
+.card { border: 1px solid var(--line); border-radius: 14px; background: var(--card); padding: 14px; margin-bottom: 12px; }
+.card h2 { font-size: 16px; margin: 0 0 10px; }
+.card h2 small { color: var(--muted); font-weight: 400; }
+.pillars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; text-align: center; }
+.pillars .lbl { font-size: 12px; color: var(--muted); }
+.ch { border-radius: 10px; color: #fff; font-size: 20px; font-weight: 700; padding: 6px 0; margin-top: 4px; }
+.ch small { display: block; font-size: 11px; font-weight: 400; opacity: .9; }
+.e0 { background: var(--wood); } .e1 { background: var(--fire); } .e2 { background: var(--earth); } .e3 { background: var(--metal); } .e4 { background: var(--water); }
+.empty { border: 1px dashed var(--line); color: var(--muted); font-size: 13px; font-weight: 400; padding: 17px 0; }
+.els { display: flex; gap: 4px; margin-top: 10px; }
+.els span { flex: 1; text-align: center; font-size: 12px; color: #fff; border-radius: 6px; padding: 2px 0; }
+.els span.zero { opacity: .3; }
+.total { text-align: center; }
+.total b { font-size: 48px; color: var(--accent); line-height: 1.1; }
+.sub { display: flex; justify-content: center; gap: 18px; color: var(--muted); font-size: 14px; }
+ul { list-style: none; padding: 0; margin: 10px 0 0; }
+li { display: flex; gap: 10px; padding: 6px 0; border-top: 1px solid var(--line); }
+li .pts { width: 3em; flex: none; text-align: right; font-weight: 700; }
+.plus { color: var(--plus); } .minus { color: var(--minus); }
+footer { color: var(--muted); font-size: 12px; margin: 20px 0; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <img alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3CclipPath id='c'%3E%3Ccircle cx='25' cy='32' r='13'/%3E%3C/clipPath%3E%3Crect width='64' height='64' rx='14' fill='%232b1638'/%3E%3Ccircle cx='25' cy='32' r='13' fill='%23f5b942'/%3E%3Ccircle cx='39' cy='32' r='13' fill='%23ff5d8f'/%3E%3Ccircle cx='39' cy='32' r='13' fill='%23fff' clip-path='url(%23c)'/%3E%3C/svg%3E">
+    <div><h1>SaJuTeeing</h1><small>사주 + MBTI 궁합 · 베타</small></div>
+  </header>
+
+  <form id="f">
+    <div class="people"></div>
+    <button>궁합 보기</button>
+  </form>
+  <div id="out" aria-live="polite"></div>
+  <footer>베타: 지금은 두 사람 궁합 계산만 됩니다. 입력한 정보는 이 기기 밖으로 보내지 않습니다. 재미로 보는 결과예요.</footer>
+</main>
+
+<template id="person">
+  <fieldset>
+    <legend></legend>
+    <label>생년월일</label>
+    <div class="row">
+      <input type="date" name="date" required min="1900-01-01" max="2099-12-31">
+      <select name="calendar" aria-label="달력"><option value="solar">양력</option><option value="lunar">음력</option><option value="leap">음력 윤달</option></select>
+    </div>
+    <label>태어난 시각 <small>(모르면 비워 두기)</small></label>
+    <input type="time" name="time">
+    <label>출생지</label>
+    <select name="place"></select>
+    <label>MBTI</label>
+    <select name="mbti"><option value="">모름</option></select>
+  </fieldset>
+</template>
+
+<script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.7.8/lunar.js"></script>
+<script src="saju.js"></script>
+<script>
+const MBTI = ['INTJ','INTP','ENTJ','ENTP','INFJ','INFP','ENFJ','ENFP','ISTJ','ISFJ','ESTJ','ESFJ','ISTP','ISFP','ESTP','ESFP'];
+const people = document.querySelector('.people'), tpl = document.getElementById('person');
+for (const who of ['나', '상대']) {
+  const fs = tpl.content.cloneNode(true).firstElementChild;
+  fs.querySelector('legend').textContent = who;
+  const place = fs.querySelector('[name=place]');
+  place.add(new Option('해외·모름', '모름'));
+  for (const p of Object.keys(Saju.PLACES)) place.add(new Option(p, p, p === '서울', p === '서울'));
+  for (const m of MBTI) fs.querySelector('[name=mbti]').add(new Option(m));
+  people.append(fs);
+}
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const read = fs => Object.fromEntries([...fs.querySelectorAll('[name]')].map(el => [el.name, el.value]));
+const pillarsHtml = r => {
+  const byLabel = Object.fromEntries(r.pillars.map(p => [p.label, p]));
+  return '<div class="pillars">' + ['시', '일', '월', '년'].map(l => {
+    const p = byLabel[l];
+    if (!p) return `<div><div class="lbl">${l}주</div><div class="ch empty">시각 모름</div></div>`;
+    return `<div><div class="lbl">${l}주</div>
+      <div class="ch e${p.g >> 1}">${p.ko[0]}<small>${p.hanja[0]} · ${Saju.EL[p.g >> 1]}</small></div>
+      <div class="ch e${[4,2,0,0,2,1,1,2,3,3,2,4][p.z]}">${p.ko[1]}<small>${p.hanja[1]}</small></div></div>`;
+  }).join('') + '</div><div class="els">' +
+    r.count.map((n, e) => `<span class="e${e}${n ? '' : ' zero'}">${Saju.EL[e]} ${n}</span>`).join('') + '</div>';
+};
+const reasonsHtml = rs => '<ul>' + rs.map(r =>
+  `<li><span class="pts ${r.pts >= 0 ? 'plus' : 'minus'}">${r.pts > 0 ? '+' : ''}${r.pts}</span><span>${esc(r.text)}</span></li>`).join('') + '</ul>';
+
+document.getElementById('f').addEventListener('submit', e => {
+  e.preventDefault();
+  const out = document.getElementById('out');
+  try {
+    const [a, b] = [...people.children].map(fs => { const v = read(fs); return { v, saju: Saju.calc(v), mbti: v.mbti }; });
+    const m = Saju.match(a, b);
+    out.innerHTML = `
+      <div class="card total"><div>궁합 점수</div><b>${m.total}</b>
+        <div class="sub"><span>사주 ${m.saju.score}</span>${m.mbti ? `<span>MBTI ${m.mbti.score}</span>` : '<span>MBTI 미입력</span>'}</div></div>
+      <div class="card"><h2>사주 궁합 <small>기본 50점에서 더하고 빼기</small></h2>${m.saju.reasons.length ? reasonsHtml(m.saju.reasons) : '<p>눈에 띄는 합·충이 없는 무난한 사이</p>'}</div>
+      ${m.mbti ? `<div class="card"><h2>MBTI 궁합 <small>${a.mbti} × ${b.mbti}</small></h2>${reasonsHtml(m.mbti.reasons)}</div>` : ''}
+      ${[a, b].map((p, i) => `<div class="card"><h2>${i ? '상대' : '나'}의 사주 <small>양력 ${p.saju.solar}${p.saju.timeKnown ? ' ' + p.v.time : ''}</small></h2>${pillarsHtml(p.saju)}</div>`).join('')}`;
+    out.scrollIntoView({ behavior: 'smooth' });
+  } catch (err) {
+    out.innerHTML = `<p class="error">${esc(err.message)}</p>`;
+  }
+});
+</script>
+</body>
+</html>
