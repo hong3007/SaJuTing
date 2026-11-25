@@ -205,6 +205,7 @@ addEventListener('unhandledrejection', e => logErr(String(e.reason?.message || e
 
 <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.7.8/lunar.js"></script>
 <script src="saju.js"></script>
+<script async src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js" integrity="sha384-DKYJZ8NLiK8MN4/C5P2dtSmLQ4KwPaoqAfyA/DfmEc1VDxu4yyC7wy6K1Hs90nka" crossorigin="anonymous"></script>
 <script>
 const SB = 'https://hirsbmfvouchasqwopsv.supabase.co/rest/v1/rpc/';
 const KEY = 'sb_publishable_-NluhOD-upGiG9TpiRPyUQ_zGxT2-rn';          // 공개용 키 (화면에 넣어도 되는 키)
@@ -335,6 +336,24 @@ const shareText = c => [
   ...[...c.m.saju.reasons, ...(c.m.mbti ? c.m.mbti.reasons : [])].filter(r => r.pts > 0).slice(0, 3).map(r => '· ' + r.text),
   location.origin + location.pathname,
 ].join('\n');
+// 카카오톡 공유 (카드 모양). JavaScript 키는 공개용 — 카카오 개발자 사이트에 등록한 도메인에서만 동작한다.
+// SDK를 못 불러왔거나 실패하면 false → 폰 공유 창 / 복사로 넘어간다
+const KAKAO_KEY = '8e5c01627a36f8dc6ccfb413d1e9d25f';
+function kakaoShare(c) {
+  try {
+    if (!window.Kakao) return false;
+    if (!Kakao.isInitialized()) Kakao.init(KAKAO_KEY);
+    const url = location.origin + location.pathname, link = { mobileWebUrl: url, webUrl: url };
+    const why = [...c.m.saju.reasons, ...(c.m.mbti ? c.m.mbti.reasons : [])].filter(r => r.pts > 0).slice(0, 2).map(r => r.text);
+    Kakao.Share.sendDefault({
+      objectType: 'feed',
+      content: { title: `${me.nickname} × ${c.nickname} 궁합 ${c.m.total}점 💘`, description: why.join(' · ') || '사주 × MBTI 궁합 소개팅',
+                 imageUrl: new URL('icon-512.png', url).href, imageWidth: 512, imageHeight: 512, link },
+      buttons: [{ title: '나도 궁합 보기', link }],
+    });
+    return true;
+  } catch (e) { logErr('카카오 공유 실패: ' + e.message); return false; }
+}
 async function copy(text, done) {
   try { await navigator.clipboard.writeText(text); msg(done); }       // 일부 앱 안 브라우저는 clipboard가 없음
   catch { msg('복사하지 못했어요. 길게 눌러 직접 복사해 주세요', true); }
@@ -347,6 +366,7 @@ list.addEventListener('click', async e => {
   if (b.dataset.act === 'copy') return copy(c.kakao_id, '카카오톡 ID를 복사했어요');
   if (b.dataset.act === 'share') {
     const text = shareText(c);
+    if (kakaoShare(c)) return;
     if (navigator.share) return navigator.share({ text }).catch(() => {});
     return copy(text, '궁합 결과를 복사했어요. 카카오톡 대화창에 붙여 넣으세요');
   }
