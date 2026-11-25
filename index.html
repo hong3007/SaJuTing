@@ -91,7 +91,17 @@ ul.plain li { display: list-item; list-style: "💗 "; margin-left: 1.4em; paddi
 #msg { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); max-width: calc(100% - 32px); background: var(--purple); color: #fff; padding: 11px 18px; border-radius: 999px; font-size: 14px; box-shadow: 0 4px 0 #4b3260; }
 #msg:empty { display: none; }
 #msg.bad { background: var(--minus); box-shadow: 0 4px 0 #c43a5f; }
+#devinfo { white-space: pre-wrap; word-break: break-all; font: 12px/1.5 ui-monospace, Consolas, monospace; background: var(--soft); border-radius: 14px; padding: 10px; margin: 10px 0 0; }
 </style>
+<script>
+// 오류 기록 (최근 20개, 이 기기에만). 개발자 탭(주소 끝 ?dev)에서 보고 복사한다
+const LOG = 'sajuteeing.log';
+function logErr(text) {
+  try { const a = JSON.parse(localStorage.getItem(LOG) || '[]'); a.push(new Date().toLocaleString('ko-KR') + ' ' + text); localStorage.setItem(LOG, JSON.stringify(a.slice(-20))); } catch {}
+}
+addEventListener('error', e => logErr(e.target?.src ? '불러오기 실패 ' + e.target.src : `${e.message} (${String(e.filename).split('/').pop()}:${e.lineno})`), true);
+addEventListener('unhandledrejection', e => logErr(String(e.reason?.message || e.reason)));
+</script>
 </head>
 <body>
 <main>
@@ -139,6 +149,11 @@ ul.plain li { display: list-item; list-style: "💗 "; margin-left: 1.4em; paddi
     <button type="button" class="link" id="del">내 정보 삭제</button>
     <p class="hint" style="text-align:center">30일 동안 접속하지 않으면 프로필이 자동으로 삭제돼요.</p>
   </section>
+  <details class="card" id="dev" hidden>
+    <summary><b>🛠 개발자</b> <small class="muted">문제가 생기면 복사해서 Claude에게 붙여 넣기</small></summary>
+    <pre id="devinfo"></pre>
+    <button type="button" class="ghost" id="devcopy">진단 정보 복사</button>
+  </details>
   <div id="msg" role="status" aria-live="polite"></div>
 </main>
 
@@ -164,6 +179,7 @@ function load() { try { return JSON.parse(localStorage.getItem(STORE)); } catch 
 function save(v) { try { v ? localStorage.setItem(STORE, JSON.stringify(v)) : localStorage.removeItem(STORE); } catch {} }
 function msg(text, bad) {
   const m = $('#msg'); m.textContent = text; m.className = bad ? 'bad' : '';
+  if (bad) logErr(text);
   clearTimeout(msgTimer); msgTimer = setTimeout(() => m.textContent = '', 4000);
 }
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -309,6 +325,26 @@ $('#del').addEventListener('click', async () => {
   try { await rpc('delete_me', { my_id: me.id, my_token: me.token }); } catch (e) { return msg(e.message, true); }
   me = null; save(null); show(); msg('삭제했어요');
 });
+
+// 개발자 탭: 주소 끝에 ?dev 를 붙이면 보인다. 기기 열쇠(token)는 넣지 않는다
+function devInfo() {
+  let log = []; try { log = JSON.parse(localStorage.getItem(LOG) || '[]'); } catch {}
+  let type = ''; try { type = ' · ' + Saju.reading(Saju.unpack(me.saju)).type; } catch {}
+  return [
+    `SaJuTeeing 진단 ${new Date().toLocaleString('ko-KR')}`,
+    `배포 시각: ${document.lastModified}`,
+    `주소: ${location.href}`,
+    `브라우저: ${navigator.userAgent}`,
+    `화면: ${innerWidth}×${innerHeight}`,
+    `만세력: ${typeof Lunar === 'undefined' ? '불러오기 실패' : 'OK'}`,
+    me ? `나: ${me.nickname} · id ${me.id} · ${me.mbti || 'MBTI 모름'}${type} · 사주 ${JSON.stringify(me.saju)}` : '나: 가입 전',
+    `추천 후보: ${cands.length}명 (매칭 ${cands.filter(c => c.kakao_id).length})`,
+    `최근 오류 ${log.length}개:`, ...(log.length ? log : ['없음']),
+  ].join('\n');
+}
+if (new URLSearchParams(location.search).has('dev')) $('#dev').hidden = false;
+$('#dev').addEventListener('toggle', () => $('#devinfo').textContent = devInfo());
+$('#devcopy').addEventListener('click', () => copy(devInfo(), '진단 정보를 복사했어요. Claude에게 붙여 넣으세요'));
 
 show();
 </script>
