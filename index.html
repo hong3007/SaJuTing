@@ -110,6 +110,7 @@ addEventListener('unhandledrejection', e => logErr(String(e.reason?.message || e
     <img alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3CclipPath id='c'%3E%3Ccircle cx='25' cy='32' r='13'/%3E%3C/clipPath%3E%3Crect width='64' height='64' rx='14' fill='%23ff7eb6'/%3E%3Ccircle cx='25' cy='32' r='13' fill='%23ffd166'/%3E%3Ccircle cx='39' cy='32' r='13' fill='%23b69cff'/%3E%3Ccircle cx='39' cy='32' r='13' fill='%23fff' clip-path='url(%23c)'/%3E%3C/svg%3E">
     <div><h1>SaJuTeeing</h1><small>사주 × MBTI 궁합 소개팅 💘 베타</small></div>
   </header>
+  <p id="notice" class="card" hidden></p>
 
   <form id="join" class="card" hidden>
     <b>🔮 내 사주 프로필 만들기</b>
@@ -154,6 +155,21 @@ addEventListener('unhandledrejection', e => logErr(String(e.reason?.message || e
     <summary><b>🛠 개발자</b> <small class="muted">문제가 생기면 복사해서 Claude에게 붙여 넣기</small></summary>
     <pre id="devinfo"></pre>
     <button type="button" class="ghost" id="devcopy">진단 정보 복사</button>
+    <form id="admin">
+      <h3>관리자 설정 <small class="muted">서버에 저장돼 모든 사람에게 적용</small></h3>
+      <input name="pw" type="password" inputmode="numeric" autocomplete="off" placeholder="비밀번호" aria-label="관리자 비밀번호">
+      <div id="adminset" hidden>
+        <p id="stats" class="read"></p>
+        <div class="row">
+          <div><label>추천 인원 (TOP)</label><input name="top" type="number" min="1" max="50"></div>
+          <div><label>하루 연락하기 한도</label><input name="like_limit" type="number" min="1" max="200"></div>
+          <div><label>IP당 하루 가입 한도</label><input name="register_limit" type="number" min="1" max="100"></div>
+        </div>
+        <label>공지 (맨 위에 보임, 비우면 숨김)</label><input name="notice" maxlength="200">
+        <button type="button" class="ghost" id="resetreg">가입 횟수 기록 비우기</button>
+      </div>
+      <button id="adminbtn">열기</button>
+    </form>
   </details>
   <div id="msg" role="status" aria-live="polite"></div>
 </main>
@@ -163,7 +179,8 @@ addEventListener('unhandledrejection', e => logErr(String(e.reason?.message || e
 <script>
 const SB = 'https://hirsbmfvouchasqwopsv.supabase.co/rest/v1/rpc/';
 const KEY = 'sb_publishable_-NluhOD-upGiG9TpiRPyUQ_zGxT2-rn';          // 공개용 키 (화면에 넣어도 되는 키)
-const STORE = 'sajuteeing.me', TOP = 3;                     // 추천 인원 (가입자가 적을 땐 3명, 늘면 20으로)
+const STORE = 'sajuteeing.me';
+let TOP = 3;                                                          // 추천 인원. 서버 설정(개발자 탭 → 관리자 설정)으로 바뀐다
 const MBTI = ['INTJ','INTP','ENTJ','ENTP','INFJ','INFP','ENFJ','ENFP','ISTJ','ISFJ','ESTJ','ESFJ','ISTP','ISFP','ESTP','ESFP'];
 const $ = s => document.querySelector(s);
 const join = $('#join'), home = $('#home'), list = $('#list');
@@ -222,8 +239,15 @@ function item(c) {
     ${action}</details>`;
 }
 
+function applySettings(s) {
+  TOP = s?.top || TOP;
+  $('#notice').textContent = s?.notice || ''; $('#notice').hidden = !s?.notice;
+}
+const settings = rpc('get_settings', {}).then(applySettings, () => {});  // 못 불러오면 기본값
+
 async function refresh() {
   list.innerHTML = '<p class="muted">불러오는 중…</p>';
+  await settings;
   let rows;
   try { rows = await rpc('candidates', { my_id: me.id, my_token: me.token }); }
   catch (e) { list.innerHTML = `<p class="error">${esc(e.message)}</p>`; return; }
@@ -352,6 +376,28 @@ function devInfo() {
 if (new URLSearchParams(location.search).has('dev')) $('#dev').hidden = false;
 $('#dev').addEventListener('toggle', () => $('#devinfo').textContent = devInfo());
 $('#devcopy').addEventListener('click', () => copy(devInfo(), '진단 정보를 복사했어요. Claude에게 붙여 넣으세요'));
+
+// 관리자 설정: 비밀번호는 서버만 안다 (화면 코드에 없음). 처음 [열기] → 현황·설정, 다시 누르면 [저장]
+const admin = $('#admin'), F = admin.elements, KEYS = ['top', 'like_limit', 'register_limit', 'notice'];
+async function adminCall(act, val) {
+  const r = await rpc('admin', { pw: F.pw.value, act, val: val || {} });
+  if (r.error) throw new Error(r.error);
+  const t = r.stats;
+  $('#stats').textContent = `가입 ${t.profiles}명 (남 ${t.men} · 여 ${t.women}) · 24시간 새 가입 ${t.today} · 7일 내 접속 ${t.active7}` +
+    ` · 연락하기 ${t.likes}건 · 매칭 ${t.matches}쌍 · 가입 횟수 기록 ${t.register_log}건`;
+  for (const k of KEYS) F[k].value = r.settings[k] ?? '';
+  $('#adminset').hidden = false; $('#adminbtn').textContent = '저장';
+  applySettings(r.settings);
+}
+admin.addEventListener('submit', async e => {
+  e.preventDefault();
+  const saving = !$('#adminset').hidden;
+  try {
+    await adminCall(saving ? 'save' : 'stats', saving ? Object.fromEntries(KEYS.map(k => [k, k === 'notice' ? F[k].value : +F[k].value])) : null);
+    if (saving) { msg('저장했어요. 다른 사람은 새로 열 때 반영돼요'); if (me) refresh(); }
+  } catch (err) { msg(err.message, true); }
+});
+$('#resetreg').addEventListener('click', () => adminCall('reset_register').then(() => msg('가입 횟수 기록을 비웠어요'), e => msg(e.message, true)));
 
 show();
 </script>
