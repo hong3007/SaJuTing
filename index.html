@@ -60,6 +60,7 @@ summary::-webkit-details-marker { display: none; }
 .who small { color: var(--muted); }
 .score { font: 32px var(--display); background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .badge { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 99px; padding: 2px 9px; margin: 2px 0 0 4px; background: #f1eaff; color: #7a5cc7; }
+.badge button.x { display: inline; width: auto; margin: 0 -4px 0 2px; padding: 0 5px; background: none; box-shadow: none; color: inherit; font: inherit; transform: none; }
 .badge.on { background: linear-gradient(135deg, #ff7eb6, #ff9f7a); color: #fff; }
 .sub { color: var(--muted); font-size: 13px; margin: 12px 0 0; }
 .kakao { background: #fff7c7; border: 2px dashed #ffd84d; border-radius: 18px; padding: 12px 14px; margin-top: 14px; }
@@ -201,12 +202,12 @@ const reasonsHtml = rs => '<ul>' + rs.map(r =>
 function item(c) {
   const m = c.m;
   const badge = c.kakao_id ? '' : c.likes_me ? '<span class="badge on">나에게 연락하기를 눌렀어요</span>'
-    : c.liked_by_me ? '<span class="badge">연락하기 보냄</span>' : '';
+    : c.liked_by_me ? `<span class="badge">연락하기 보냄<button class="x" data-act="unlike" data-i="${c.i}" aria-label="연락하기 취소" title="연락하기 취소">✕</button></span>` : '';
   const action = c.kakao_id
     ? `<div class="kakao">카카오톡 ID<br><b>${esc(c.kakao_id)}</b></div>
        <div class="row"><button class="ghost" data-act="copy" data-i="${c.i}">ID 복사</button><button data-act="share" data-i="${c.i}">궁합 공유하기</button></div>
        <p class="hint">카카오톡 → 친구 추가 → ID로 추가에 붙여 넣고, [궁합 공유하기]로 결과를 보내며 대화를 시작해 보세요.</p>`
-    : c.liked_by_me ? '<p class="hint">상대도 [연락하기]를 누르면 카카오톡 ID가 열려요. 14일 동안 답이 없으면 사라지고 다시 보낼 수 있어요.</p>'
+    : c.liked_by_me ? '<p class="hint">상대도 [연락하기]를 누르면 카카오톡 ID가 열려요. 14일 동안 답이 없으면 사라지고 다시 보낼 수 있어요. 마음이 바뀌면 위의 ✕로 취소해요.</p>'
     : `<button data-act="like" data-i="${c.i}">연락하기 💌</button>`;
   return `<details class="card item"${c.kakao_id ? ' open' : ''}>
     <summary><span class="rank">${c.i + 1}</span>
@@ -274,6 +275,7 @@ async function copy(text, done) {
 
 list.addEventListener('click', async e => {
   const b = e.target.closest('button[data-act]'); if (!b) return;
+  e.preventDefault();                                                 // ✕는 카드 제목줄 안에 있어서 카드가 열리고 닫히지 않게
   const c = cands[b.dataset.i];
   if (b.dataset.act === 'copy') return copy(c.kakao_id, '카카오톡 ID를 복사했어요');
   if (b.dataset.act === 'share') {
@@ -283,6 +285,11 @@ list.addEventListener('click', async e => {
   }
   b.disabled = true;
   try {
+    if (b.dataset.act === 'unlike') {
+      await rpc('unlike_profile', { my_id: me.id, my_token: me.token, target: c.id });
+      msg('연락하기를 취소했어요. 상대 화면에서도 사라져요');
+      return await refresh();
+    }
     const matched = await rpc('like_profile', { my_id: me.id, my_token: me.token, target: c.id });
     msg(matched ? '매칭 성공! 카카오톡 ID가 열렸어요' : '연락하기를 보냈어요. 상대도 누르면 카카오톡 ID가 열려요');
     await refresh();
