@@ -69,6 +69,9 @@ ul { list-style: none; padding: 0; margin: 8px 0 0; }
 li { display: flex; gap: 10px; padding: 5px 0; border-top: 1px solid var(--line); font-size: 14px; }
 li .pts { width: 2.6em; flex: none; text-align: right; font-weight: 700; }
 .plus { color: var(--plus); } .minus { color: var(--minus); }
+h3 { font-size: 14px; margin: 16px 0 4px; }
+.read { margin: 0; font-size: 14px; }
+ul.plain li { display: list-item; list-style: "· "; margin-left: 1em; padding: 3px 0; border: 0; }
 #msg { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); max-width: calc(100% - 32px); background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-size: 14px; }
 #msg:empty { display: none; }
 #msg.bad { background: var(--minus); color: #fff; }
@@ -176,7 +179,9 @@ function item(c) {
     <summary><span class="rank">${c.i + 1}</span>
       <span class="who"><b>${esc(c.nickname)}</b><small>${esc(c.birth_year)}년생 · ${esc(c.mbti || 'MBTI 모름')}</small>${badge}</span>
       <span class="score">${m.total}</span></summary>
-    <p class="sub">사주 ${m.saju.score}점${m.mbti ? ` · MBTI ${m.mbti.score}점` : ''}</p>
+    <h3>상대는 ${esc(Saju.reading(c.saju).type)} 같은 사람</h3>
+    <p class="read">${esc(Saju.reading(c.saju).me)}</p>
+    <h3>궁합 <small class="muted">사주 ${m.saju.score}점${m.mbti ? ` · MBTI ${m.mbti.score}점` : ''}</small></h3>
     ${reasonsHtml([...m.saju.reasons, ...(m.mbti ? m.mbti.reasons : [])])}
     ${pillarsHtml(c.saju)}
     ${action}</details>`;
@@ -201,10 +206,19 @@ async function refresh() {
     (more.length ? '<h2>연락하기를 주고받은 사람</h2>' + more.map(item).join('') : '');
 }
 
-function show() {
+function show(justJoined) {
   join.hidden = !!me; home.hidden = !me;
   if (!me) return;
-  $('#mine').innerHTML = `<summary><b>${esc(me.nickname)}</b>님의 사주 <small class="muted">· ${esc(me.mbti || 'MBTI 모름')} · 눌러서 보기</small></summary>${pillarsHtml(Saju.unpack(me.saju))}`;
+  const saju = Saju.unpack(me.saju), rd = Saju.reading(saju), lis = a => '<ul class="plain">' + a.map(t => `<li>${esc(t)}</li>`).join('') + '</ul>';
+  const mine = $('#mine');
+  mine.innerHTML = `<summary><b>${esc(me.nickname)}</b>님의 연애 사주 <small class="muted">· ${esc(rd.type)} 같은 사람 · 눌러서 보기</small></summary>
+    <h3>당신은 어떤 사람</h3><p class="read">${esc(rd.me)}</p>
+    <h3>연애 스타일</h3>${lis(rd.style)}
+    <h3>이런 사람을 만나세요</h3>${lis(rd.meet)}
+    <p class="hint">${esc(rd.avoid)}</p>
+    <p class="hint">추천 목록의 사주 칸 색으로 상대의 기운을 볼 수 있어요: 초록 목 · 빨강 화 · 노랑 토 · 회색 금 · 파랑 수. 재미로 보는 풀이예요.</p>
+    <h3>내 사주 8글자 <small class="muted">${esc(me.mbti || 'MBTI 모름')}</small></h3>${pillarsHtml(saju)}`;
+  if (justJoined) mine.open = true;
   refresh();
 }
 
@@ -262,7 +276,7 @@ join.addEventListener('submit', async e => {
     const saju = Saju.calc(v), packed = Saju.pack(saju);
     const r = await rpc('register', { p: { nickname: v.nickname.trim(), gender: v.gender, want: v.want, birth: saju.solar, mbti: v.mbti, saju: packed, kakao_id: v.kakao_id.trim() } });
     me = { id: r.id, token: r.token, nickname: v.nickname.trim(), mbti: v.mbti, saju: packed };
-    save(me); show(); scrollTo(0, 0);
+    save(me); show(true); scrollTo(0, 0);
   } catch (err) { msg(err.message, true); }
   btn.disabled = false;
 });
