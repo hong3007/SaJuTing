@@ -70,6 +70,7 @@ li { display: flex; gap: 10px; padding: 5px 0; border-top: 1px solid var(--line)
 li .pts { width: 2.6em; flex: none; text-align: right; font-weight: 700; }
 .plus { color: var(--plus); } .minus { color: var(--minus); }
 h3 { font-size: 14px; margin: 16px 0 4px; }
+.stars { color: var(--accent); letter-spacing: 1px; }
 .read { margin: 0; font-size: 14px; }
 ul.plain li { display: list-item; list-style: "· "; margin-left: 1em; padding: 3px 0; border: 0; }
 #msg { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); max-width: calc(100% - 32px); background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-size: 14px; }
@@ -210,9 +211,12 @@ function show(justJoined) {
   join.hidden = !!me; home.hidden = !me;
   if (!me) return;
   const saju = Saju.unpack(me.saju), rd = Saju.reading(saju), lis = a => '<ul class="plain">' + a.map(t => `<li>${esc(t)}</li>`).join('') + '</ul>';
-  const mine = $('#mine');
-  mine.innerHTML = `<summary><b>${esc(me.nickname)}</b>님의 연애 사주 <small class="muted">· ${esc(rd.type)} 같은 사람 · 눌러서 보기</small></summary>
-    <h3>당신은 어떤 사람</h3><p class="read">${esc(rd.me)}</p>
+  const mine = $('#mine'), per = Saju.periods();
+  const fs = ['year', 'month', 'day'].map(k => Saju.fortune(saju, per[k], k));
+  const star = n => '★'.repeat(n) + '☆'.repeat(5 - n);
+  mine.innerHTML = `<summary><b>${esc(me.nickname)}</b>님의 연애 사주 <small class="muted">· 오늘 연애운 <span class="stars">${star(fs[2].stars)}</span> · 눌러서 보기</small></summary>
+    ${fs.map(f => `<h3>${esc(f.title)} 연애운 <span class="stars">${star(f.stars)}</span></h3>${lis(f.lines)}`).join('')}
+    <h3>타고난 성향: 당신은 어떤 사람 <small class="muted">${esc(rd.type)}</small></h3><p class="read">${esc(rd.me)}</p>
     <h3>연애 스타일</h3>${lis(rd.style)}
     <h3>이런 사람을 만나세요</h3>${lis(rd.meet)}
     <p class="hint">${esc(rd.avoid)}</p>

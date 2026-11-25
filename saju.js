@@ -187,6 +187,47 @@
     };
   }
 
+  // ── 시기별 연애운: 올해(세운)·이번 달(월운)·오늘(일진) 간지가 내 사주에 주는 영향 ──
+  /** 지금 시점의 간지. 년·월은 절기 기준, 일은 한국 날짜 기준 */
+  function periods(date = new Date()) {
+    const ym = solarAt(date.getTime() + 8 * 3600e3).getLunar().getEightChar();
+    const kst = new Date(date.getTime() + 9 * 3600e3);
+    const d = Solar.fromYmd(kst.getUTCFullYear(), kst.getUTCMonth() + 1, kst.getUTCDate()).getLunar().getEightChar();
+    return {
+      year: { ...pillar(ym.getYear(), '년'), name: `${kst.getUTCFullYear()}년` },
+      month: { ...pillar(ym.getMonth(), '월'), name: `${kst.getUTCMonth() + 1}월` },
+      day: { ...pillar(d.getDay(), '일'), name: '오늘' },
+    };
+  }
+  const THEME = [                                                      // 그 시기 천간 오행 - 내 일간 오행 (비겁·식상·재성·관성·인성)
+    '나와 닮은 사람에게 끌리는 때예요. 친구처럼 편한 인연이 생기기 쉽지만, 고집을 세우면 다툼이 될 수 있어요.',
+    '매력과 표현력이 살아나는 때예요. 마음에 둔 사람이 있다면 먼저 표현해 보세요.',
+    '새로운 만남이 활발한 때예요. 모임이나 소개 자리에 나가면 좋은 인연을 만나기 쉬워요.',
+    '진지한 인연이 찾아오는 때예요. 가벼운 만남보다 오래 갈 관계를 고민하게 돼요.',
+    '보살핌을 받는 때예요. 서두르기보다 나를 아껴 주는 사람을 알아보는 눈이 생겨요.',
+  ];
+  const BRANCH = {
+    hap: ['배우자 자리와 합이 들어와 인연이 맺어지기 좋아요.', 1],
+    samHap: ['주변 사람의 소개나 모임에서 인연이 이어지기 쉬워요.', 0.5],
+    chung: ['배우자 자리가 흔들려 관계에 변화가 생기기 쉬워요. 큰 결정은 한 번 더 생각하세요.', -1],
+    wonjin: ['사소한 말이 오해로 번지기 쉬워요. 서운한 건 바로 말로 풀어 주세요.', -0.5],
+  };
+  const PEACH = [9, 6, 3, 0];                                          // 도화: 申子辰→酉, 巳酉丑→午, 寅午戌→卯, 亥卯未→子 (지지 번호 % 4로 묶음)
+  const PREFIX = { year: '올해는', month: '이번 달은', day: '오늘은' };
+
+  /** 한 시기의 연애운. r = 내 사주, p = periods()의 year/month/day, scope = 'year'|'month'|'day' */
+  function fortune(r, p, scope) {
+    const e = r.pillars[2].g >> 1, dz = r.pillars[2].z, yz = r.pillars[0].z;
+    const theme = ((p.g >> 1) - e + 5) % 5;
+    const lines = [`${PREFIX[scope]} ${THEME[theme]}`];
+    let s = 3 + (theme >= 1 && theme <= 3 ? 0.5 : 0);
+    const rel = p.z === dz ? null : zhiRel(dz, p.z);
+    if (rel) { lines.push(BRANCH[rel][0]); s += BRANCH[rel][1]; }
+    if (p.z === PEACH[dz % 4] || p.z === PEACH[yz % 4]) { lines.push('도화(桃花)가 들어와 이성의 눈에 띄고 인기가 많아져요.'); s += 1; }
+    const stars = Math.max(1, Math.min(5, Math.round(s)));
+    return { title: `${p.name} ${p.ko}${p.label}`, stars, lines };
+  }
+
   /** 두 사람 {saju: calc() 결과, mbti: 'ENFP'} → 궁합 */
   function match(a, b) {
     const saju = sajuScore(a.saju, b.saju), mbti = mbtiScore(a.mbti, b.mbti);
@@ -194,6 +235,6 @@
     return { total, saju, mbti };
   }
 
-  const api = { calc, match, reading, pack, unpack, PLACES, EL, ZHI_EL, W };
+  const api = { calc, match, reading, periods, fortune, pack, unpack, PLACES, EL, ZHI_EL, W };
   if (typeof module === 'object') module.exports = api; else root.Saju = api;
 })(this);
