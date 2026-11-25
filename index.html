@@ -128,7 +128,7 @@ ul.plain li { display: list-item; list-style: "💗 "; margin-left: 1.4em; paddi
     <input name="kakao_id" required maxlength="40" autocapitalize="off" autocomplete="off" spellcheck="false">
     <p class="hint">서로 [연락하기]를 누른 사람에게만 공개돼요. 카카오톡 설정에서 'ID 검색 허용'을 켜 두세요.</p>
     <label class="check"><input type="checkbox" required> 만 19세 이상입니다.</label>
-    <label class="check"><input type="checkbox" required> 닉네임·성별·출생연도·사주 결과·MBTI·카카오톡 ID를 추천과 매칭에만 쓰는 데 동의합니다. 생년월일과 시각은 저장하지 않고, 삭제하면 바로 지워집니다.</label>
+    <label class="check"><input type="checkbox" required> 닉네임·성별·출생연도·사주 결과·MBTI·카카오톡 ID를 추천과 매칭에만 쓰는 데 동의합니다. 생년월일과 시각은 저장하지 않고, 삭제하면 바로 지워집니다. 30일 동안 접속하지 않으면 자동으로 삭제됩니다.</label>
     <p class="hint">베타 기간에는 로그인 없이 이 기기(브라우저)에서만 내 프로필이 열려요. 브라우저 기록을 지우면 다시 가입해야 해요.</p>
     <button>가입하고 추천 보기 💘</button>
   </form>
@@ -137,6 +137,7 @@ ul.plain li { display: list-item; list-style: "💗 "; margin-left: 1.4em; paddi
     <details class="card" id="mine"></details>
     <div id="list"></div>
     <button type="button" class="link" id="del">내 정보 삭제</button>
+    <p class="hint" style="text-align:center">30일 동안 접속하지 않으면 프로필이 자동으로 삭제돼요.</p>
   </section>
   <div id="msg" role="status" aria-live="polite"></div>
 </main>
@@ -189,7 +190,7 @@ function item(c) {
     ? `<div class="kakao">카카오톡 ID<br><b>${esc(c.kakao_id)}</b></div>
        <div class="row"><button class="ghost" data-act="copy" data-i="${c.i}">ID 복사</button><button data-act="share" data-i="${c.i}">궁합 공유하기</button></div>
        <p class="hint">카카오톡 → 친구 추가 → ID로 추가에 붙여 넣고, [궁합 공유하기]로 결과를 보내며 대화를 시작해 보세요.</p>`
-    : c.liked_by_me ? '<p class="hint">상대도 [연락하기]를 누르면 카카오톡 ID가 열려요.</p>'
+    : c.liked_by_me ? '<p class="hint">상대도 [연락하기]를 누르면 카카오톡 ID가 열려요. 14일 동안 답이 없으면 사라지고 다시 보낼 수 있어요.</p>'
     : `<button data-act="like" data-i="${c.i}">연락하기 💌</button>`;
   return `<details class="card item"${c.kakao_id ? ' open' : ''}>
     <summary><span class="rank">${c.i + 1}</span>
