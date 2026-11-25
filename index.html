@@ -129,10 +129,24 @@ addEventListener('unhandledrejection', e => logErr(String(e.reason?.message || e
     <p id="mSay"></p>
   </section>
 
+  <details class="card" id="loginbox" hidden>
+    <summary><b>🔑 이미 가입했어요 → 불러오기</b></summary>
+    <form id="login">
+      <label>닉네임</label><input name="nick" required maxlength="20" autocomplete="username">
+      <label>비밀번호 (숫자 6자리)</label>
+      <input name="pin" type="password" required inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="current-password" title="숫자 6자리">
+      <button>불러오기</button>
+    </form>
+  </details>
+
   <form id="join" class="card" hidden>
     <b>🔮 내 사주 프로필 만들기</b>
     <label>닉네임</label>
     <input name="nickname" required maxlength="20" autocomplete="nickname">
+    <p class="hint" id="nickhint" hidden></p>
+    <label>비밀번호 (숫자 6자리)</label>
+    <input name="pin" type="password" required inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="new-password" title="숫자 6자리">
+    <p class="hint">다른 기기에서 닉네임과 이 비밀번호로 내 프로필을 불러올 수 있어요.</p>
     <div class="row">
       <div><label>나</label><select name="gender"><option value="M">남자</option><option value="F">여자</option></select></div>
       <div><label>만나고 싶은 상대</label><select name="want"><option value="F">여자</option><option value="M">남자</option></select></div>
@@ -157,8 +171,7 @@ addEventListener('unhandledrejection', e => logErr(String(e.reason?.message || e
     <input name="kakao_id" required maxlength="40" autocapitalize="off" autocomplete="off" spellcheck="false">
     <p class="hint">서로 [연락하기]를 누른 사람에게만 공개돼요. 카카오톡 설정에서 'ID 검색 허용'을 켜 두세요.</p>
     <label class="check"><input type="checkbox" required> 만 19세 이상입니다.</label>
-    <label class="check"><input type="checkbox" required> 닉네임·성별·출생연도·사주 결과·MBTI·카카오톡 ID를 추천과 매칭에만 쓰는 데 동의합니다. 생년월일과 시각은 저장하지 않고, 삭제하면 바로 지워집니다. 30일 동안 접속하지 않으면 자동으로 삭제됩니다.</label>
-    <p class="hint">베타 기간에는 로그인 없이 이 기기(브라우저)에서만 내 프로필이 열려요. 브라우저 기록을 지우면 다시 가입해야 해요.</p>
+    <label class="check"><input type="checkbox" required> 닉네임·성별·출생연도·사주 결과·MBTI·카카오톡 ID를 추천과 매칭에만 쓰는 데 동의합니다. 생년월일과 시각은 저장하지 않고, 비밀번호는 암호화해서 저장하며, 삭제하면 바로 지워집니다. 30일 동안 접속하지 않으면 자동으로 삭제됩니다.</label>
     <button>가입하고 추천 보기 💘</button>
   </form>
 
@@ -296,7 +309,7 @@ async function refresh() {
 }
 
 function show(justJoined) {
-  join.hidden = !!me; home.hidden = !me;
+  join.hidden = $('#loginbox').hidden = !!me; home.hidden = !me;
   if (!me) return;
   const saju = Saju.unpack(me.saju), rd = Saju.reading(saju), lis = a => '<ul class="plain">' + a.map(t => `<li>${esc(t)}</li>`).join('') + '</ul>';
   const mine = $('#mine'), per = Saju.periods();
@@ -375,9 +388,33 @@ join.addEventListener('submit', async e => {
   btn.disabled = true;
   try {
     const saju = Saju.calc(v), packed = Saju.pack(saju);
-    const r = await rpc('register', { p: { nickname: v.nickname.trim(), gender: v.gender, want: v.want, birth: saju.solar, mbti: v.mbti, saju: packed, kakao_id: v.kakao_id.trim() } });
+    const r = await rpc('register', { p: { nickname: v.nickname.trim(), pin: v.pin, gender: v.gender, want: v.want, birth: saju.solar, mbti: v.mbti, saju: packed, kakao_id: v.kakao_id.trim() } });
     me = { id: r.id, token: r.token, nickname: v.nickname.trim(), mbti: v.mbti, saju: packed };
     save(me); show(true); scrollTo(0, 0);
+  } catch (err) { msg(err.message, true); }
+  btn.disabled = false;
+});
+
+// 닉네임 중복 확인: 입력을 마치면(칸을 벗어나면) 바로 알려 준다
+join.nickname.addEventListener('change', async () => {
+  const h = $('#nickhint'), n = join.nickname.value.trim();
+  if (!n) return h.hidden = true;
+  try {
+    const free = await rpc('nickname_free', { nick: n });
+    h.textContent = free ? '✅ 쓸 수 있는 닉네임이에요' : '❌ 이미 있는 닉네임이에요. 다른 닉네임을 써 주세요';
+    h.className = free ? 'hint' : 'hint error'; h.hidden = false;
+  } catch { h.hidden = true; }
+});
+
+// 불러오기: 닉네임 + 비밀번호 → 이 기기에 내 프로필 열기
+$('#login').addEventListener('submit', async e => {
+  e.preventDefault();
+  const f = e.target, btn = f.querySelector('button');
+  btn.disabled = true;
+  try {
+    const r = await rpc('login', { nick: f.nick.value.trim(), pin: f.pin.value });
+    if (r.error) throw new Error(r.error);
+    me = r; save(me); f.reset(); show(); scrollTo(0, 0); msg(`${me.nickname}님 다시 왔네요 💘`);
   } catch (err) { msg(err.message, true); }
   btn.disabled = false;
 });
