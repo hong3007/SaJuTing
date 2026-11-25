@@ -163,7 +163,7 @@ addEventListener('unhandledrejection', e => logErr(String(e.reason?.message || e
 <script>
 const SB = 'https://hirsbmfvouchasqwopsv.supabase.co/rest/v1/rpc/';
 const KEY = 'sb_publishable_-NluhOD-upGiG9TpiRPyUQ_zGxT2-rn';          // 공개용 키 (화면에 넣어도 되는 키)
-const STORE = 'sajuteeing.me', TOP = 20;
+const STORE = 'sajuteeing.me', TOP = 3;                     // 추천 인원 (가입자가 적을 땐 3명, 늘면 20으로)
 const MBTI = ['INTJ','INTP','ENTJ','ENTP','INFJ','INFP','ENFJ','ENFP','ISTJ','ISFJ','ESTJ','ESFJ','ISTP','ISFP','ESTP','ESFP'];
 const $ = s => document.querySelector(s);
 const join = $('#join'), home = $('#home'), list = $('#list');
