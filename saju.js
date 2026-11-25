@@ -164,6 +164,19 @@
   const EL_NAME = ['목(나무)', '화(불)', '토(흙)', '금(쇠)', '수(물)'];
   const ganName = g => `${GAN_KO[g]}${EL[g >> 1]}(${GAN_IMG[g]})`;
 
+  // 별명 (MZ 말투): 타고난 일간으로 정하고, 올해 연애운 별점에 따라 앞말이 바뀐다
+  const NICK = [
+    ['직진 플러팅 장인', '🌳'], ['다정 만렙 연애 요정', '🌿'], ['인간 비타민 심쿵 유발자', '☀️'], ['스며드는 설렘 장인', '🕯️'],
+    ['무뚝뚝 다정 츤데레', '⛰️'], ['다 받아 주는 연애 힐러', '🌾'], ['쿨한 척 직진 의리러', '⚔️'], ['눈 높은 연애 감별사', '💎'],
+    ['자유 영혼 밀당 고수', '🌊'], ['눈치 백단 감성 극F', '💧'],
+  ];
+  const NICK_MOOD = ['', '충전 중인', '숨 고르는', '', '물 오른', '폼 미친'];  // 별점 1~5
+  /** 별명. yearStars = 올해 연애운 별점(없으면 앞말 없음) */
+  function nickname(r, yearStars) {
+    const [name, emoji] = NICK[r.pillars[2].g], mood = NICK_MOOD[yearStars] || '';
+    return { text: (mood ? mood + ' ' : '') + name, emoji };
+  }
+
   /** 연애 사주 풀이. r = calc() 또는 unpack() 결과 */
   function reading(r) {
     const g = r.pillars[2].g, z = r.pillars[2].z, e = g >> 1;
@@ -199,12 +212,18 @@
       day: { ...pillar(d.getDay(), '일'), name: '오늘' },
     };
   }
-  const THEME = [                                                      // 그 시기 천간 오행 - 내 일간 오행 (비겁·식상·재성·관성·인성)
-    '나와 닮은 사람에게 끌리는 때예요. 친구처럼 편한 인연이 생기기 쉽지만, 고집을 세우면 다툼이 될 수 있어요.',
-    '매력과 표현력이 살아나는 때예요. 마음에 둔 사람이 있다면 먼저 표현해 보세요.',
-    '새로운 만남이 활발한 때예요. 모임이나 소개 자리에 나가면 좋은 인연을 만나기 쉬워요.',
-    '진지한 인연이 찾아오는 때예요. 가벼운 만남보다 오래 갈 관계를 고민하게 돼요.',
-    '보살핌을 받는 때예요. 서두르기보다 나를 아껴 주는 사람을 알아보는 눈이 생겨요.',
+  // 십신: 그 시기 천간이 내 일간에 주는 기운 10가지 [문장, 별점 가감]. 순서 = (오행 관계 × 2) + (음양이 다르면 1)
+  const THEME = [
+    ['나와 닮은 사람에게 끌리는 때예요. 친구 같은 편한 인연이 생기기 쉬워요.', 0],                          // 비견
+    ['경쟁자가 나타나기 쉬운 때예요. 마음에 드는 사람이 있다면 망설이지 말고 다가가세요.', -0.5],             // 겁재
+    ['여유가 생기고 매력이 자연스럽게 묻어나는 때예요. 편하게 웃는 모습에 상대가 끌려요.', 0.5],               // 식신
+    ['표현력이 넘치는 때예요. 고백하기 좋지만, 말이 날카로워지지 않게 조심하세요.', 0.5],                       // 상관
+    ['새로운 만남이 활발한 때예요. 모임이나 소개 자리에서 뜻밖의 인연을 만나기 쉬워요.', 1],                   // 편재
+    ['안정적인 인연이 들어오는 때예요. 차근차근 믿음을 쌓는 만남이 잘 풀려요.', 0.5],                          // 정재
+    ['강렬한 끌림이 찾아오는 때예요. 설렘이 큰 만큼 상대를 천천히 알아 가세요.', 0.5],                         // 편관
+    ['진지한 인연이 찾아오는 때예요. 가벼운 만남보다 오래 갈 관계를 고민하게 돼요.', 1],                       // 정관
+    ['혼자만의 시간이 필요한 때예요. 서두르지 말고 내 마음부터 들여다보세요.', -0.5],                          // 편인
+    ['보살핌을 받는 때예요. 나를 아껴 주는 사람을 알아보는 눈이 생겨요.', 0],                                  // 정인
   ];
   const BRANCH = {
     hap: ['배우자 자리와 합이 들어와 인연이 맺어지기 좋아요.', 1],
@@ -218,9 +237,9 @@
   /** 한 시기의 연애운. r = 내 사주, p = periods()의 year/month/day, scope = 'year'|'month'|'day' */
   function fortune(r, p, scope) {
     const e = r.pillars[2].g >> 1, dz = r.pillars[2].z, yz = r.pillars[0].z;
-    const theme = ((p.g >> 1) - e + 5) % 5;
-    const lines = [`${PREFIX[scope]} ${THEME[theme]}`];
-    let s = 3 + (theme >= 1 && theme <= 3 ? 0.5 : 0);
+    const theme = (((p.g >> 1) - e + 5) % 5) * 2 + ((p.g + r.pillars[2].g) % 2);
+    const lines = [`${PREFIX[scope]} ${THEME[theme][0]}`];
+    let s = 3 + THEME[theme][1];
     const rel = p.z === dz ? null : zhiRel(dz, p.z);
     if (rel) { lines.push(BRANCH[rel][0]); s += BRANCH[rel][1]; }
     if (p.z === PEACH[dz % 4] || p.z === PEACH[yz % 4]) { lines.push('도화(桃花)가 들어와 이성의 눈에 띄고 인기가 많아져요.'); s += 1; }
@@ -235,6 +254,6 @@
     return { total, saju, mbti };
   }
 
-  const api = { calc, match, reading, periods, fortune, pack, unpack, PLACES, EL, ZHI_EL, W };
+  const api = { calc, match, reading, nickname, periods, fortune, pack, unpack, PLACES, EL, ZHI_EL, W };
   if (typeof module === 'object') module.exports = api; else root.Saju = api;
 })(this);
