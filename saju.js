@@ -1,4 +1,4 @@
-/* SaJuTeeing 궁합 엔진: 생년월일시 → 사주 8글자 → 두 사람 궁합 점수 (사주 + MBTI)
+/* SaJuTing 궁합 엔진: 생년월일시 → 사주 8글자 → 두 사람 궁합 점수 (사주 + MBTI)
  * 브라우저: lunar.js 다음에 <script src="saju.js"> → window.Saju
  * Node:    require('./saju.js')
  * 만세력(절기·음력 변환)은 lunar-javascript(MIT) 사용. 해석 규칙과 점수는 아래 W 표에서 조정한다. */
