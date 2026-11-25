@@ -94,6 +94,15 @@ ul.plain li { display: list-item; list-style: "💗 "; margin-left: 1.4em; paddi
 #msg { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); max-width: calc(100% - 32px); background: var(--purple); color: #fff; padding: 11px 18px; border-radius: 999px; font-size: 14px; box-shadow: 0 4px 0 #4b3260; }
 #msg:empty { display: none; }
 #msg.bad { background: var(--minus); box-shadow: 0 4px 0 #c43a5f; }
+#pulse { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 0 16px; }
+#pulse[hidden] { display: none; }
+#pulse > div { text-align: center; padding: 12px 6px 8px; border-radius: 22px; border: 2px solid var(--line); box-shadow: 0 5px 0 var(--shadow);
+  background: radial-gradient(circle at 20% 15%, #fff 0 30%, transparent 31%), linear-gradient(135deg, #fff6fb, #ffe3f0); }
+#pulse > div + div { background: radial-gradient(circle at 80% 15%, #fff 0 30%, transparent 31%), linear-gradient(135deg, #f8f4ff, #e9e0ff); }
+#pulse small { display: block; color: var(--muted); font-size: 12px; font-weight: 700; }
+#pulse b { font: 38px/1.1 var(--display); background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+#pulse small.u { display: inline; margin-left: 3px; font: 15px var(--display); color: var(--purple); }
+#pulse p { grid-column: 1 / -1; margin: 0; text-align: center; font: 15px var(--display); color: var(--purple); }
 #devinfo { white-space: pre-wrap; word-break: break-all; font: 12px/1.5 ui-monospace, Consolas, monospace; background: var(--soft); border-radius: 14px; padding: 10px; margin: 10px 0 0; }
 </style>
 <script>
@@ -114,6 +123,11 @@ addEventListener('unhandledrejection', e => logErr(String(e.reason?.message || e
     <button type="button" id="devbtn" tabindex="-1" aria-hidden="true"></button>
   </header>
   <p id="notice" class="card" hidden></p>
+  <section id="pulse" hidden aria-label="매칭 현황">
+    <div><small>오늘 이어진 커플 💞</small><b id="mToday">0</b><small class="u">쌍</small></div>
+    <div><small>지금까지 커플 🔥</small><b id="mTotal">0</b><small class="u">쌍</small></div>
+    <p id="mSay"></p>
+  </section>
 
   <form id="join" class="card" hidden>
     <b>🔮 내 사주 프로필 만들기</b>
@@ -244,6 +258,20 @@ function item(c) {
 function applySettings(s) {
   TOP = s?.top || TOP;
   $('#notice').textContent = s?.notice || ''; $('#notice').hidden = !s?.notice;
+  if (s?.total_matches != null) showPulse(s.today_matches, s.total_matches);
+}
+// 첫 화면 매칭 현황: 숫자가 0부터 올라가는 연출 + 상황별 한마디
+function showPulse(today, total) {
+  $('#pulse').hidden = false;
+  $('#mSay').textContent = today ? `오늘 벌써 ${today}쌍 이어짐 ㄷㄷ 다음 차례 나일 수도? 💘`
+    : total ? '오늘의 첫 커플 자리 비어있음 👀 주인공 ㄱㄱ' : '1호 커플 탄생 직전임 👀 주인공 될 사람?';
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches, t0 = performance.now();
+  const tick = t => {
+    const p = still ? 1 : Math.min((t - t0) / 900, 1), e = 1 - (1 - p) ** 3;
+    $('#mToday').textContent = Math.round(today * e); $('#mTotal').textContent = Math.round(total * e);
+    if (p < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
 }
 const settings = rpc('get_settings', {}).then(applySettings, () => {});  // 못 불러오면 기본값
 
@@ -318,6 +346,7 @@ list.addEventListener('click', async e => {
     }
     const matched = await rpc('like_profile', { my_id: me.id, my_token: me.token, target: c.id });
     msg(matched ? '매칭 성공! 카카오톡 ID가 열렸어요' : '연락하기를 보냈어요. 상대도 누르면 카카오톡 ID가 열려요');
+    if (matched) rpc('get_settings', {}).then(applySettings, () => {});   // 첫 화면 매칭 수 올리기
     await refresh();
   } catch (err) {
     msg(err.message, true);
