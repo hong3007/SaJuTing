@@ -1,0 +1,56 @@
+Copyright (c) 2026 hong3007. All rights reserved.
+
+SaJuTeeing 저작권 고지 및 이용 제한
+
+이 저장소에 있는 소스 코드, 화면 디자인, 문구, 아이콘, 궁합 점수 산정 코드 등
+모든 저작물(이하 "본 저작물")의 저작권은 저작권자(hong3007)에게 있습니다.
+
+1. 허락 없는 이용 금지
+   저작권자의 사전 서면 허락 없이 본 저작물의 전부 또는 일부를 복제, 수정, 배포,
+   게시, 판매, 대여하거나, 2차적 저작물을 만들거나, 상업적·비상업적 서비스에 사용할
+   수 없습니다.
+
+2. 공개의 의미
+   본 저작물을 공개 저장소에 둔 것은 열람만을 위한 것이며, 어떠한 이용 허락(라이선스)도
+   주지 않습니다. GitHub 이용약관에 따라 GitHub 안에서 보거나 포크(fork)할 수는 있지만,
+   포크한 사본에도 이 고지의 제한이 그대로 적용됩니다.
+
+3. 서비스 이용
+   https://hong3007.github.io/SaJuTeeing/ 에서 서비스를 이용하는 것은 허용됩니다.
+   이는 본 저작물을 복제하거나 수정할 권한을 포함하지 않습니다.
+
+4. 자동 수집 및 학습 금지
+   본 저작물을 크롤링·스크래핑으로 수집하거나, 인공지능 모델의 학습 데이터로 쓰는 것을
+   금지합니다.
+
+5. 제3자 구성요소
+   만세력 계산에 쓰는 lunar-javascript(Copyright (c) 2018 6tail)는 MIT 라이선스를
+   따르며 CDN에서 불러옵니다. 이 고지는 그 구성요소에 적용되지 않습니다.
+
+6. 보증 없음
+   본 저작물은 "있는 그대로" 제공되며, 저작권자는 본 저작물의 이용으로 생긴 어떠한
+   손해에도 책임지지 않습니다. 궁합 결과는 재미를 위한 참고 정보입니다.
+
+7. 위반 시
+   이 고지를 위반한 이용은 대한민국 저작권법 등 관련 법령에 따른 민사·형사상 책임의
+   대상이 될 수 있습니다.
+
+8. 이용 허락 문의
+   GitHub 사용자 hong3007 에게 문의하십시오.
+
+한국어 본문과 아래 영문 요약이 다를 경우 한국어 본문이 우선합니다.
+
+--------------------------------------------------------------------------------
+English summary
+
+Copyright (c) 2026 hong3007. All rights reserved.
+
+This repository is published for viewing only. No license is granted. You may not
+copy, modify, distribute, publish, sell, sublicense, create derivative works from,
+or use any part of this work in any product or service, commercial or not, without
+the prior written permission of the copyright holder. Forks made under the GitHub
+Terms of Service remain subject to these restrictions. Scraping this work or using
+it to train AI models is prohibited. Using the hosted service at
+https://hong3007.github.io/SaJuTeeing/ is permitted and grants no rights to the code.
+Third-party component lunar-javascript (Copyright (c) 2018 6tail) is under its own
+MIT License. THE WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
