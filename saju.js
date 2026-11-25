@@ -63,9 +63,24 @@
     dt.setSect(1);                                                     // 밤 11시부터 다음 날로 본다 (시각 모르면 정오로 계산)
     const pillars = [pillar(ym.getYear(), '년'), pillar(ym.getMonth(), '월'), pillar(dt.getDay(), '일')];
     if (known) pillars.push(pillar(dt.getTime(), '시'));
+    return { solar: `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`, ...summary(pillars) };
+  }
+  function summary(pillars) {
     const count = [0, 0, 0, 0, 0];
     for (const p of pillars) { count[p.g >> 1]++; count[ZHI_EL[p.z]]++; }
-    return { solar: `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`, timeKnown: known, pillars, count, dayEl: pillars[2].g >> 1 };
+    return { timeKnown: pillars.length === 4, pillars, count, dayEl: pillars[2].g >> 1 };
+  }
+
+  // 서버 저장용: [[천간 번호, 지지 번호], ...] (년·월·일·시)
+  const pack = r => r.pillars.map(p => [p.g, p.z]);
+  // 서버에서 받은 값 → calc 결과 모양. 다른 사용자가 보낸 값이라 번호를 검사하고 글자는 여기서 다시 만든다
+  function unpack(arr) {
+    if (!Array.isArray(arr) || arr.length < 3 || arr.length > 4) throw new Error('사주 데이터 오류');
+    return summary(arr.map((gz, i) => {
+      const [g, z] = Array.isArray(gz) ? gz : [];
+      if (!Number.isInteger(g) || !Number.isInteger(z) || g < 0 || g > 9 || z < 0 || z > 11 || g % 2 !== z % 2) throw new Error('사주 데이터 오류');
+      return pillar(GAN[g] + ZHI[z], '년월일시'[i]);
+    }));
   }
 
   const zhiRel = (a, b) =>
@@ -115,6 +130,6 @@
     return { total, saju, mbti };
   }
 
-  const api = { calc, match, PLACES, EL, W };
+  const api = { calc, match, pack, unpack, PLACES, EL, ZHI_EL, W };
   if (typeof module === 'object') module.exports = api; else root.Saju = api;
 })(this);
