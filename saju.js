@@ -49,9 +49,14 @@
   function calc({ date, time = '', calendar = 'solar', place = '서울' }) {
     let [y, m, d] = String(date).split('-').map(Number);
     if (!y || !m || !d) throw new Error('생년월일을 입력하세요');
+    if (calendar === 'solar' && new Date(Date.UTC(y, m - 1, d)).getUTCDate() !== d) throw new Error(`${y}년 ${m}월에는 ${d}일이 없습니다`);
     if (calendar !== 'solar') {
-      try { ({ y, m, d } = (s => ({ y: s.getYear(), m: s.getMonth(), d: s.getDay() }))(Lunar.fromYmd(y, calendar === 'leap' ? -m : m, d).getSolar())); }
-      catch { throw new Error(calendar === 'leap' ? `${y}년에는 윤${m}월이 없습니다` : '없는 음력 날짜입니다'); }
+      const leap = calendar === 'leap' ? '윤' : '';
+      try { ({ y, m, d } = (s => ({ y: s.getYear(), m: s.getMonth(), d: s.getDay() }))(Lunar.fromYmd(y, leap ? -m : m, d).getSolar())); }
+      catch (e) {                                                      // 라이브러리 오류: 'wrong lunar year …'(그런 달 없음) / 'only N days …'(그런 날 없음)
+        const days = /only (\d+) days/.exec(e.message);
+        throw new Error(days ? `음력 ${y}년 ${leap}${m}월은 ${days[1]}일까지 있습니다` : leap ? `${y}년에는 윤${m}월이 없습니다` : '없는 음력 날짜입니다');
+      }
     }
     const known = /^\d{1,2}:\d{2}$/.test(time);
     const [h, mi] = known ? time.split(':').map(Number) : [12, 0];
