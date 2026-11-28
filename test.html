@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SaJuTing</title>
+<meta name="theme-color" content="#ffe6f2">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&display=swap">
+<meta name="description" content="사주팔자와 MBTI 궁합으로 만나는 소개팅 (베타)">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3CclipPath id='c'%3E%3Ccircle cx='25' cy='32' r='13'/%3E%3C/clipPath%3E%3Crect width='64' height='64' rx='14' fill='%23ff7eb6'/%3E%3Ccircle cx='25' cy='32' r='13' fill='%23ffd166'/%3E%3Ccircle cx='39' cy='32' r='13' fill='%23b69cff'/%3E%3Ccircle cx='39' cy='32' r='13' fill='%23fff' clip-path='url(%23c)'/%3E%3C/svg%3E">
+<link rel="icon" type="image/png" sizes="192x192" href="data:image/png;base64,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">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<style>
+/* 귀염뽀짝 파스텔 테마 (다크 모드에서도 밝게 고정) */
+:root {
+  color-scheme: light;
+  --text: #3d2a4d; --muted: #a08bb0; --line: #f6dcea; --card: #fff; --soft: #fff0f7; --shadow: #ffd3e7;
+  --accent: #ff5fa2; --accent2: #a78bfa; --accent-text: #fff; --purple: #6b4c86;
+  --wood: #2e9e5e; --wood-bg: #d7f5e3; --fire: #e5486b; --fire-bg: #ffdbe2; --earth: #b07d00; --earth-bg: #fff1bf;
+  --metal: #6c6990; --metal-bg: #ebe7f7; --water: #3a74d1; --water-bg: #d6ebff;
+  --plus: #1f9d63; --minus: #f0507a; --star: #ffb020;
+  --display: "Jua", system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+}
+* { box-sizing: border-box; }
+html { background: #fff4f9; }
+body { margin: 0; min-height: 100vh; color: var(--text); background: linear-gradient(180deg, #ffe6f2 0%, #f6efff 45%, #eaf5ff 100%); font: 15px/1.6 system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
+main { max-width: 640px; margin: 0 auto; padding: 18px 16px 90px; }
+header { display: flex; align-items: center; gap: 10px; margin: 4px 0 18px; }
+header img { width: 44px; height: 44px; filter: drop-shadow(0 3px 0 var(--shadow)); }
+header h1 { font: 26px/1.1 var(--display); margin: 0; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+header small, .muted, .hint { color: var(--muted); }
+#kakaologin { background: #fee500; color: #191919; box-shadow: 0 5px 0 #d9c300; }   /* 카카오 로그인 버튼 (카카오 노란색) */
+#start > b { font: 20px var(--display); color: var(--purple); }
+#devbtn { flex: none; width: 44px; height: 44px; margin: 0 0 0 auto; padding: 0; background: none; box-shadow: none; opacity: 0; cursor: default; }  /* 숨은 개발자 버튼 (오른쪽 위 빈 곳) */
+.hint { font-size: 13px; margin: 8px 0 0; }
+h2 { font: 20px/1.3 var(--display); margin: 28px 4px 10px; color: var(--purple); }
+h3 { font: 16px/1.4 var(--display); margin: 18px 0 6px; color: var(--purple); }
+label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-top: 14px; }
+label.check { display: flex; gap: 8px; align-items: flex-start; color: var(--text); font-size: 14px; font-weight: 400; }
+label.check input { width: 18px; height: 18px; flex: none; margin-top: 3px; accent-color: var(--accent); }
+.row { display: flex; gap: 6px; }
+.row > * { flex: 1; min-width: 0; }
+input, select, button { font: inherit; color: var(--text); }
+input, select { width: 100%; min-width: 0; padding: 10px 12px; border: 2px solid var(--line); border-radius: 14px; background: #fffafd; }
+input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px #ffe0ef; }
+button { display: block; width: 100%; margin: 16px 0 0; padding: 13px; border: 0; border-radius: 999px; cursor: pointer;
+  background: linear-gradient(135deg, #ff7eb6, #ff9f7a); color: #fff; font: 17px var(--display); box-shadow: 0 5px 0 #e85b97; transition: transform .08s, box-shadow .08s; }
+button:active { transform: translateY(3px); box-shadow: 0 2px 0 #e85b97; }
+button:disabled { opacity: .5; }
+button.ghost { background: #fff; color: var(--accent); border: 2px solid #ffc6de; box-shadow: 0 4px 0 var(--shadow); }
+button.link { background: none; box-shadow: none; color: var(--muted); font: 13px system-ui, sans-serif; text-decoration: underline; width: auto; margin: 30px auto 0; }
+.card { background: var(--card); border: 2px solid var(--line); border-radius: 24px; padding: 16px; margin-bottom: 14px; box-shadow: 0 6px 0 var(--shadow); }
+#join > b { font: 20px var(--display); color: var(--purple); }
+.error { color: var(--minus); font-weight: 600; }
+summary { cursor: pointer; list-style: none; }
+summary::-webkit-details-marker { display: none; }
+.item summary { display: flex; align-items: center; gap: 10px; }
+.rank { width: 32px; height: 32px; flex: none; display: grid; place-items: center; border-radius: 50%; background: var(--soft); color: var(--accent); font: 16px var(--display); }
+.who { flex: 1; min-width: 0; }
+.who b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 17px var(--display); }
+.who small { color: var(--muted); }
+.score { font: 32px var(--display); background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.badge { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 99px; padding: 2px 9px; margin: 2px 0 0 4px; background: #f1eaff; color: #7a5cc7; }
+.badge button.x { display: inline; width: auto; margin: 0 -4px 0 2px; padding: 0 5px; background: none; box-shadow: none; color: inherit; font: inherit; transform: none; }
+.badge.on { background: linear-gradient(135deg, #ff7eb6, #ff9f7a); color: #fff; }
+.sub { color: var(--muted); font-size: 13px; margin: 12px 0 0; }
+.kakao { background: #fff7c7; border: 2px dashed #ffd84d; border-radius: 18px; padding: 12px 14px; margin-top: 14px; }
+.kakao b { font: 22px var(--display); word-break: break-all; }
+.pillars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; text-align: center; margin-top: 12px; }
+.pillars .lbl { font-size: 12px; color: var(--muted); }
+.ch { border-radius: 14px; font: 21px var(--display); padding: 6px 0 4px; margin-top: 4px; }
+.ch small { display: block; font: 11px system-ui, sans-serif; opacity: .85; }
+.e0 { background: var(--wood-bg); color: var(--wood); } .e1 { background: var(--fire-bg); color: var(--fire); }
+.e2 { background: var(--earth-bg); color: var(--earth); } .e3 { background: var(--metal-bg); color: var(--metal); }
+.e4 { background: var(--water-bg); color: var(--water); }
+.empty { border: 2px dashed var(--line); color: var(--muted); font: 12px system-ui, sans-serif; padding: 14px 0; }
+.els { display: flex; gap: 4px; margin-top: 8px; }
+.els span { flex: 1; text-align: center; font-size: 12px; font-weight: 700; border-radius: 99px; padding: 2px 0; }
+.els span.zero { opacity: .35; }
+ul { list-style: none; padding: 0; margin: 8px 0 0; }
+li { display: flex; gap: 10px; padding: 6px 0; border-top: 1px dashed var(--line); font-size: 14px; }
+li .pts { width: 2.6em; flex: none; text-align: right; font: 15px var(--display); }
+.plus { color: var(--plus); } .minus { color: var(--minus); }
+.stars { color: var(--star); letter-spacing: 1px; }
+.nickbox { text-align: center; padding: 4px 0; }
+.nickbox .emoji { display: grid; place-items: center; width: 78px; height: 78px; margin: 2px auto 8px; border-radius: 50%; font-size: 42px;
+  background: radial-gradient(circle at 30% 30%, #fff, #ffe0ef); box-shadow: 0 4px 0 var(--shadow); animation: bob 2.4s ease-in-out infinite; }
+.nickbox .nick { display: block; font: 25px/1.25 var(--display); margin-bottom: 4px; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+@keyframes bob { 50% { transform: translateY(-4px) rotate(-4deg); } }
+@media (prefers-reduced-motion: reduce) { .nickbox .emoji { animation: none; } }
+.read { margin: 0 0 4px; font-size: 14.5px; }
+ul.plain li { display: list-item; list-style: "💗 "; margin-left: 1.4em; padding: 3px 0; border: 0; }
+#msg { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); max-width: calc(100% - 32px); background: var(--purple); color: #fff; padding: 11px 18px; border-radius: 999px; font-size: 14px; box-shadow: 0 4px 0 #4b3260; }
+#msg:empty { display: none; }
+#msg.bad { background: var(--minus); box-shadow: 0 4px 0 #c43a5f; }
+#pulse { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 0 16px; }
+#pulse[hidden] { display: none; }
+#pulse > div { text-align: center; padding: 12px 6px 8px; border-radius: 22px; border: 2px solid var(--line); box-shadow: 0 5px 0 var(--shadow);
+  background: radial-gradient(circle at 20% 15%, #fff 0 30%, transparent 31%), linear-gradient(135deg, #fff6fb, #ffe3f0); }
+#pulse > div + div { background: radial-gradient(circle at 80% 15%, #fff 0 30%, transparent 31%), linear-gradient(135deg, #f8f4ff, #e9e0ff); }
+#pulse small { display: block; color: var(--muted); font-size: 12px; font-weight: 700; }
+#pulse b { font: 38px/1.1 var(--display); background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+#pulse small.u { display: inline; margin-left: 3px; font: 15px var(--display); color: var(--purple); }
+#pulse p { grid-column: 1 / -1; margin: 0; text-align: center; font: 15px var(--display); color: var(--purple); }
+#devinfo { white-space: pre-wrap; word-break: break-all; font: 12px/1.5 ui-monospace, Consolas, monospace; background: var(--soft); border-radius: 14px; padding: 10px; margin: 10px 0 0; }
+</style>
+<script>
+// 오류 기록 (최근 20개, 이 기기에만). 개발자 탭에서 보고 복사한다
+const LOG = 'sajuteeing.log';
+function logErr(text) {
+  try { const a = JSON.parse(localStorage.getItem(LOG) || '[]'); a.push(new Date().toLocaleString('ko-KR') + ' ' + text); localStorage.setItem(LOG, JSON.stringify(a.slice(-20))); } catch {}
+}
+addEventListener('error', e => logErr(e.target?.src ? '불러오기 실패 ' + e.target.src : `${e.message} (${String(e.filename).split('/').pop()}:${e.lineno})`), true);
+addEventListener('unhandledrejection', e => logErr(String(e.reason?.message || e.reason)));
+</script>
+</head>
+<body>
+<main>
+  <header>
+    <img alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3CclipPath id='c'%3E%3Ccircle cx='25' cy='32' r='13'/%3E%3C/clipPath%3E%3Crect width='64' height='64' rx='14' fill='%23ff7eb6'/%3E%3Ccircle cx='25' cy='32' r='13' fill='%23ffd166'/%3E%3Ccircle cx='39' cy='32' r='13' fill='%23b69cff'/%3E%3Ccircle cx='39' cy='32' r='13' fill='%23fff' clip-path='url(%23c)'/%3E%3C/svg%3E">
+    <div><h1>SaJuTing</h1><small>사주 × MBTI 궁합 소개팅 💘 베타</small></div>
+    <button type="button" id="devbtn" tabindex="-1" aria-hidden="true"></button>
+  </header>
+  <p id="notice" class="card" hidden></p>
+  <section id="pulse" hidden aria-label="매칭 현황">
+    <div><small>오늘 이어진 커플 💞</small><b id="mToday">0</b><small class="u">쌍</small></div>
+    <div><small>지금까지 커플 🔥</small><b id="mTotal">0</b><small class="u">쌍</small></div>
+    <p id="mSay"></p>
+  </section>
+
+  <section id="start" class="card" hidden>
+    <b>🔮 내 사주 프로필 만들기</b>
+    <p class="hint">카카오 계정으로 시작해요. 이미 가입했다면 같은 버튼으로 내 프로필을 불러와요. 카카오 닉네임·사진은 다른 사람에게 보이지 않아요.</p>
+    <button type="button" id="kakaologin">카카오로 시작하기</button>
+  </section>
+
+  <form id="join" class="card" hidden>
+    <b>🔮 내 사주 프로필 만들기</b>
+    <label>닉네임</label>
+    <input name="nickname" required maxlength="20" autocomplete="nickname">
+    <p class="hint" id="nickhint" hidden></p>
+    <div class="row">
+      <div><label>나</label><select name="gender"><option value="M">남자</option><option value="F">여자</option></select></div>
+      <div><label>만나고 싶은 상대</label><select name="want"><option value="F">여자</option><option value="M">남자</option></select></div>
+    </div>
+    <label>생년월일</label>
+    <div class="row">
+      <select name="calendar" aria-label="달력" style="flex:1.3"><option value="solar">양력</option><option value="lunar">음력</option><option value="leap">음력 윤달</option></select>
+      <select name="year" required aria-label="연" style="flex:1.2"><option value="">연</option></select>
+      <select name="month" required aria-label="월"><option value="">월</option></select>
+      <select name="day" required aria-label="일"><option value="">일</option></select>
+    </div>
+    <label>태어난 시각</label>
+    <div class="row">
+      <select name="hour" aria-label="시"><option value="">모름</option></select>
+      <select name="minute" aria-label="분"></select>
+    </div>
+    <div class="row">
+      <div><label>출생지</label><select name="place"></select></div>
+      <div><label>MBTI</label><select name="mbti"><option value="">모름</option></select></div>
+    </div>
+    <label>카카오톡 ID</label>
+    <input name="kakao_id" required maxlength="40" autocapitalize="off" autocomplete="off" spellcheck="false">
+    <p class="hint">서로 [연락하기]를 누른 사람에게만 공개돼요. 카카오톡 설정에서 'ID 검색 허용'을 켜 두세요.</p>
+    <label class="check"><input type="checkbox" required> 만 19세 이상입니다.</label>
+    <label class="check"><input type="checkbox" required> 닉네임·성별·출생연도·사주 결과·MBTI·카카오톡 ID를 추천과 매칭에만 쓰는 데 동의합니다. 생년월일과 시각은 저장하지 않고, 카카오 계정은 로그인에만 쓰며, 삭제하면 바로 지워집니다. 30일 동안 접속하지 않으면 자동으로 삭제됩니다.</label>
+    <button>가입하고 추천 보기 💘</button>
+  </form>
+
+  <section id="home" hidden>
+    <details class="card" id="mine"></details>
+    <div id="list"></div>
+    <button type="button" class="link" id="kakaolink" hidden>카카오 계정 연결하기 (다른 폰에서 불러오기용)</button>
+    <button type="button" class="link" id="del">내 정보 삭제</button>
+    <p class="hint" style="text-align:center">30일 동안 접속하지 않으면 프로필이 자동으로 삭제돼요.</p>
+  </section>
+  <details class="card" id="dev" hidden>
+    <summary><b>🛠 개발자</b></summary>
+    <form id="admin">
+      <input name="pw" type="password" inputmode="numeric" autocomplete="off" placeholder="비밀번호" aria-label="비밀번호" style="margin-top:12px">
+      <div id="adminset" hidden>
+        <pre id="devinfo"></pre>
+        <button type="button" class="ghost" id="devcopy">진단 정보 복사</button>
+        <p id="stats" class="read" style="margin-top:14px"></p>
+        <div class="row">
+          <div><label>추천 인원 (TOP)</label><input name="top" type="number" min="1" max="50"></div>
+          <div><label>하루 연락하기 한도</label><input name="like_limit" type="number" min="1" max="200"></div>
+          <div><label>IP당 하루 가입 한도</label><input name="register_limit" type="number" min="1" max="100"></div>
+        </div>
+        <label>공지 (맨 위에 보임, 비우면 숨김)</label><input name="notice" maxlength="200">
+        <button type="button" class="ghost" id="resetreg">가입 횟수 기록 비우기</button>
+      </div>
+      <button id="adminbtn">열기</button>
+    </form>
+  </details>
+  <div id="msg" role="status" aria-live="polite"></div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.7.8/lunar.js"></script>
+<script src="saju.js"></script>
+<script async src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js" integrity="sha384-DKYJZ8NLiK8MN4/C5P2dtSmLQ4KwPaoqAfyA/DfmEc1VDxu4yyC7wy6K1Hs90nka" crossorigin="anonymous"></script>
+<script>
+const SB_URL = 'https://hirsbmfvouchasqwopsv.supabase.co', SB = SB_URL + '/rest/v1/rpc/';
+const KEY = 'sb_publishable_-NluhOD-upGiG9TpiRPyUQ_zGxT2-rn';          // 공개용 키 (화면에 넣어도 되는 키)
+const STORE = 'sajuteeing.me';
+let TOP = 3;                                                          // 추천 인원. 서버 설정(개발자 탭 → 관리자 설정)으로 바뀐다
+const MBTI = ['INTJ','INTP','ENTJ','ENTP','INFJ','INFP','ENFJ','ENFP','ISTJ','ISFJ','ESTJ','ESFJ','ISTP','ISFP','ESTP','ESFP'];
+const $ = s => document.querySelector(s);
+const join = $('#join'), home = $('#home'), list = $('#list');
+let me = load(), cands = [], msgTimer;
+
+// 카카오 로그인 (Supabase Auth). 카카오에서 돌아오면 주소 # 뒤에 access_token이 붙어 온다.
+// 이 열쇠(1시간 유효)는 가입·불러오기·연결 때만 쓰고, 그 뒤로는 지금처럼 기기 열쇠(token)로 다닌다
+const JWT = 'sajuting.jwt';
+let jwt = (() => {
+  const h = new URLSearchParams(location.hash.slice(1) + '&' + location.search.slice(1)), t = h.get('access_token');
+  if (t || h.has('error')) history.replaceState(null, '', location.pathname);   // 주소에서 지우기
+  if (h.has('error')) msg('카카오 로그인을 못 했어요: ' + (h.get('error_description') || h.get('error')), true);
+  try { if (t) sessionStorage.setItem(JWT, t); return t || sessionStorage.getItem(JWT); } catch { return t; }
+})();
+function dropJwt() { jwt = null; try { sessionStorage.removeItem(JWT); } catch {} }
+
+async function rpc(fn, body, token) {
+  const headers = { apikey: KEY, 'Content-Type': 'application/json' };
+  if (token) headers.Authorization = 'Bearer ' + token;
+  const r = await fetch(SB + fn, { method: 'POST', headers, body: JSON.stringify(body) });
+  const j = await r.json().catch(() => null);
+  if (r.ok) return j;
+  if (/다시 가입/.test(j?.message)) { me = null; save(null); show(); }  // 서버에 내 프로필이 없음 → 가입 화면으로
+  throw new Error(j?.message || `서버 오류 (${r.status})`);
+}
+function load() { try { return JSON.parse(localStorage.getItem(STORE)); } catch { return null; } }
+function save(v) { try { v ? localStorage.setItem(STORE, JSON.stringify(v)) : localStorage.removeItem(STORE); } catch {} }
+function msg(text, bad) {
+  const m = $('#msg'); m.textContent = text; m.className = bad ? 'bad' : '';
+  if (bad) logErr(text);
+  clearTimeout(msgTimer); msgTimer = setTimeout(() => m.textContent = '', 4000);
+}
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+
+const pillarsHtml = r => {
+  const by = Object.fromEntries(r.pillars.map(p => [p.label, p]));
+  return '<div class="pillars">' + ['시', '일', '월', '년'].map(l => {
+    const p = by[l];
+    if (!p) return `<div><div class="lbl">${l}주</div><div class="ch empty">시각 모름</div></div>`;
+    return `<div><div class="lbl">${l}주</div>
+      <div class="ch e${p.g >> 1}">${p.ko[0]}<small>${p.hanja[0]} · ${Saju.EL[p.g >> 1]}</small></div>
+      <div class="ch e${Saju.ZHI_EL[p.z]}">${p.ko[1]}<small>${p.hanja[1]}</small></div></div>`;
+  }).join('') + '</div><div class="els">' +
+    r.count.map((n, e) => `<span class="e${e}${n ? '' : ' zero'}">${Saju.EL[e]} ${n}</span>`).join('') + '</div>';
+};
+const reasonsHtml = rs => '<ul>' + rs.map(r =>
+  `<li><span class="pts ${r.pts >= 0 ? 'plus' : 'minus'}">${r.pts > 0 ? '+' : ''}${r.pts}</span><span>${esc(r.text)}</span></li>`).join('') + '</ul>';
+
+function item(c) {
+  const m = c.m;
+  const badge = c.kakao_id ? '' : c.likes_me ? '<span class="badge on">나에게 연락하기를 눌렀어요</span>'
+    : c.liked_by_me ? `<span class="badge">연락하기 보냄<button class="x" data-act="unlike" data-i="${c.i}" aria-label="연락하기 취소" title="연락하기 취소">✕</button></span>` : '';
+  const action = c.kakao_id
+    ? `<div class="kakao">카카오톡 ID<br><b>${esc(c.kakao_id)}</b></div>
+       <div class="row"><button class="ghost" data-act="copy" data-i="${c.i}">ID 복사</button><button data-act="share" data-i="${c.i}">궁합 공유하기</button></div>
+       <p class="hint">카카오톡 → 친구 추가 → ID로 추가에 붙여 넣고, [궁합 공유하기]로 결과를 보내며 대화를 시작해 보세요.</p>`
+    : c.liked_by_me ? '<p class="hint">상대도 [연락하기]를 누르면 카카오톡 ID가 열려요. 14일 동안 답이 없으면 사라지고 다시 보낼 수 있어요. 마음이 바뀌면 위의 ✕로 취소해요.</p>'
+    : `<button data-act="like" data-i="${c.i}">연락하기 💌</button>`;
+  return `<details class="card item"${c.kakao_id ? ' open' : ''}>
+    <summary><span class="rank">${c.i + 1}</span>
+      <span class="who"><b>${esc(c.nickname)}</b><small>${esc(c.birth_year)}년생 · ${esc(c.mbti || 'MBTI 모름')}</small>${badge}</span>
+      <span class="score">${m.total}</span></summary>
+    <h3>상대는 ${Saju.nickname(c.saju).emoji} ${esc(Saju.nickname(c.saju).text)} <small class="muted">${esc(Saju.reading(c.saju).type)}</small></h3>
+    <p class="read">${esc(Saju.reading(c.saju).tmi)}</p>
+    <p class="read">${esc(Saju.reading(c.saju).me)}</p>
+    <h3>궁합 <small class="muted">사주 ${m.saju.score}점${m.mbti ? ` · MBTI ${m.mbti.score}점` : ''}</small></h3>
+    ${reasonsHtml([...m.saju.reasons, ...(m.mbti ? m.mbti.reasons : [])])}
+    ${pillarsHtml(c.saju)}
+    ${action}</details>`;
+}
+
+function applySettings(s) {
+  TOP = s?.top || TOP;
+  $('#notice').textContent = s?.notice || ''; $('#notice').hidden = !s?.notice;
+  if (s?.total_matches != null) showPulse(s.today_matches, s.total_matches);
+}
+// 첫 화면 매칭 현황: 숫자가 0부터 올라가는 연출 + 상황별 한마디
+function showPulse(today, total) {
+  $('#pulse').hidden = false;
+  $('#mSay').textContent = today ? `오늘 벌써 ${today}쌍 이어짐 ㄷㄷ 다음 차례 나일 수도? 💘`
+    : total ? '오늘의 첫 커플 자리 비어있음 👀 주인공 ㄱㄱ' : '1호 커플 탄생 직전임 👀 주인공 될 사람?';
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches, t0 = performance.now();
+  const tick = t => {
+    const p = still ? 1 : Math.min((t - t0) / 900, 1), e = 1 - (1 - p) ** 3;
+    $('#mToday').textContent = Math.round(today * e); $('#mTotal').textContent = Math.round(total * e);
+    if (p < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+const settings = rpc('get_settings', {}).then(applySettings, () => {});  // 못 불러오면 기본값
+
+async function refresh() {
+  list.innerHTML = '<p class="muted">불러오는 중…</p>';
+  await settings;
+  let rows;
+  try { rows = await rpc('candidates', { my_id: me.id, my_token: me.token }); }
+  catch (e) { list.innerHTML = `<p class="error">${esc(e.message)}</p>`; return; }
+  const mine = { saju: Saju.unpack(me.saju), mbti: me.mbti };
+  cands = rows.flatMap(r => {                                         // 다른 사람이 보낸 사주 값은 unpack에서 검사
+    try { const saju = Saju.unpack(r.saju); return [{ ...r, saju, m: Saju.match(mine, { saju, mbti: r.mbti }) }]; } catch { return []; }
+  }).sort((a, b) => b.m.total - a.m.total);
+  cands.forEach((c, i) => c.i = i);
+  const matched = cands.filter(c => c.kakao_id);
+  const top = cands.filter(c => !c.kakao_id && c.i < TOP);
+  const more = cands.filter(c => !c.kakao_id && c.i >= TOP && (c.likes_me || c.liked_by_me));
+  list.innerHTML = (matched.length ? `<h2>💞 매칭 성공 ${matched.length}</h2>` + matched.map(item).join('') : '') +
+    `<h2>✨ 궁합 TOP ${TOP}</h2>` +
+    (top.length ? top.map(item).join('') : '<p class="muted">아직 추천할 사람이 없어요. 링크를 친구에게 알려 주세요!</p>') +
+    (more.length ? '<h2>💌 연락하기를 주고받은 사람</h2>' + more.map(item).join('') : '');
+}
+
+function show(justJoined) {
+  $('#start').hidden = !!(me || jwt); join.hidden = !!me || !jwt; home.hidden = !me;
+  if (!me) return;
+  $('#kakaolink').hidden = !!me.kakao;
+  const saju = Saju.unpack(me.saju), rd = Saju.reading(saju), lis = a => '<ul class="plain">' + a.map(t => `<li>${esc(t)}</li>`).join('') + '</ul>';
+  const mine = $('#mine'), per = Saju.periods();
+  const fs = ['year', 'month', 'day'].map(k => Saju.fortune(saju, per[k], k));
+  const star = n => '★'.repeat(n) + '☆'.repeat(5 - n);
+  const nick = Saju.nickname(saju, fs[0].stars);
+  mine.innerHTML = `<summary class="nickbox"><span class="emoji">${nick.emoji}</span><b class="nick">${esc(nick.text)}</b>
+      <small class="muted">${esc(me.nickname)}님의 연애 사주 · 오늘 <span class="stars">${star(fs[2].stars)}</span> · 눌러서 보기</small></summary>
+    <button type="button" class="ghost" id="myshare">내 연애 사주 공유하기 💌</button>
+    ${fs.map(f => `<h3>${esc(f.title)} 연애운 <span class="stars">${star(f.stars)}</span></h3>${lis(f.lines)}`).join('')}
+    <h3>나는 어떤 사람? <small class="muted">${esc(rd.type)}</small></h3><p class="read">${esc(rd.me)}</p><p class="read">${esc(rd.tmi)}</p>
+    <h3>연애 스타일</h3>${lis(rd.style)}
+    <h3>이런 사람 만나야 함</h3>${lis(rd.meet)}
+    <p class="hint">⚠️ ${esc(rd.avoid)}</p>
+    <p class="hint">추천 목록 사주 칸 색으로 상대 기운 확인 가능: 초록 목 · 빨강 화 · 노랑 토 · 회색 금 · 파랑 수. 재미로 보는 풀이임!</p>
+    <h3>내 사주 8글자 <small class="muted">${esc(me.mbti || 'MBTI 모름')}</small></h3>${pillarsHtml(saju)}`;
+  if (justJoined) mine.open = true;
+  myCard = { title: `${me.nickname}님은 ${nick.emoji} ${nick.text}`, description: `올해 연애운 ${star(fs[0].stars)} · ${rd.type}`,
+             button: '내 연애 사주 보기', lines: [rd.tmi] };
+  refresh();
+}
+let myCard;
+$('#mine').addEventListener('click', e => { if (e.target.id === 'myshare') share(myCard, '내 연애 사주를 복사했어요. 카카오톡 대화창에 붙여 넣으세요'); });
+
+const matchCard = c => {
+  const why = [...c.m.saju.reasons, ...(c.m.mbti ? c.m.mbti.reasons : [])].filter(r => r.pts > 0).map(r => r.text);
+  return { title: `${me.nickname} × ${c.nickname} 궁합 ${c.m.total}점 💘`, description: why.slice(0, 2).join(' · ') || '사주 × MBTI 궁합 소개팅',
+           button: '나도 궁합 보기', lines: [`사주 ${c.m.saju.score}점${c.m.mbti ? ` · MBTI ${c.m.mbti.score}점` : ''}`, ...why.slice(0, 3).map(t => '· ' + t)] };
+};
+// 카톡 카드 → 폰 공유 창 → 복사 순서로 시도
+function share(card, copied) {
+  if (kakaoShare(card)) return;
+  const text = ['SaJuTing ' + card.title, ...card.lines, location.origin + location.pathname].join('\n');
+  if (navigator.share) return navigator.share({ text }).catch(() => {});
+  return copy(text, copied);
+}
+// 카카오톡 공유 (카드 모양). JavaScript 키는 공개용 — 카카오 개발자 사이트에 등록한 도메인에서만 동작한다.
+// SDK를 못 불러왔거나 실패하면 false → 폰 공유 창 / 복사로 넘어간다
+const KAKAO_KEY = '8e5c01627a36f8dc6ccfb413d1e9d25f';
+function kakaoShare(card) {
+  try {
+    if (!window.Kakao) return false;
+    if (!Kakao.isInitialized()) Kakao.init(KAKAO_KEY);
+    const url = location.origin + location.pathname, link = { mobileWebUrl: url, webUrl: url };
+    Kakao.Share.sendDefault({
+      objectType: 'feed',
+      content: { title: card.title, description: card.description,
+                 imageUrl: new URL('icon-512.png', url).href, imageWidth: 512, imageHeight: 512, link },
+      buttons: [{ title: card.button, link }],
+    });
+    return true;
+  } catch (e) { logErr('카카오 공유 실패: ' + e.message); return false; }
+}
+async function copy(text, done) {
+  try { await navigator.clipboard.writeText(text); msg(done); }       // 일부 앱 안 브라우저는 clipboard가 없음
+  catch { msg('복사하지 못했어요. 길게 눌러 직접 복사해 주세요', true); }
+}
+
+list.addEventListener('click', async e => {
+  const b = e.target.closest('button[data-act]'); if (!b) return;
+  e.preventDefault();                                                 // ✕는 카드 제목줄 안에 있어서 카드가 열리고 닫히지 않게
+  const c = cands[b.dataset.i];
+  if (b.dataset.act === 'copy') return copy(c.kakao_id, '카카오톡 ID를 복사했어요');
+  if (b.dataset.act === 'share') return share(matchCard(c), '궁합 결과를 복사했어요. 카카오톡 대화창에 붙여 넣으세요');
+  b.disabled = true;
+  try {
+    if (b.dataset.act === 'unlike') {
+      await rpc('unlike_profile', { my_id: me.id, my_token: me.token, target: c.id });
+      msg('연락하기를 취소했어요. 상대 화면에서도 사라져요');
+      return await refresh();
+    }
+    const matched = await rpc('like_profile', { my_id: me.id, my_token: me.token, target: c.id });
+    msg(matched ? '매칭 성공! 카카오톡 ID가 열렸어요' : '연락하기를 보냈어요. 상대도 누르면 카카오톡 ID가 열려요');
+    if (matched) rpc('get_settings', {}).then(applySettings, () => {});   // 첫 화면 매칭 수 올리기
+    await refresh();
+  } catch (err) {
+    msg(err.message, true);
+    if (me) await refresh();                                          // 상대가 탈퇴했으면 목록에서 빠진다
+  }
+});
+
+for (const p of Object.keys(Saju.PLACES)) join.place.add(new Option(p, p));
+join.place.add(new Option('해외·모름', '모름'));
+for (const m of MBTI) join.mbti.add(new Option(m));
+// 생년월일은 선택 상자로 받는다 (날짜 칸은 음력 2월 30일 같은 날짜를 막아서)
+for (let y = new Date().getFullYear() - 19; y >= 1930; y--) join.year.add(new Option(`${y}년`, y));
+for (let m = 1; m <= 12; m++) join.month.add(new Option(`${m}월`, m));
+for (let d = 1; d <= 31; d++) join.day.add(new Option(`${d}일`, d));
+for (let h = 0; h < 24; h++) join.hour.add(new Option(`${h < 12 ? '오전' : '오후'} ${h % 12 || 12}시${h === 0 ? ' (밤 12시)' : h === 12 ? ' (낮 12시)' : ''}`, h));
+for (let m = 0; m < 60; m++) join.minute.add(new Option(`${m}분`, String(m).padStart(2, '0')));
+const syncMinute = () => join.minute.disabled = !join.hour.value;
+join.hour.addEventListener('change', syncMinute); syncMinute();
+join.gender.addEventListener('change', () => join.want.value = join.gender.value === 'M' ? 'F' : 'M');
+
+join.addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = join.querySelector('button'), v = Object.fromEntries(new FormData(join));
+  v.time = v.hour ? `${v.hour}:${v.minute}` : '';
+  v.date = `${v.year}-${String(v.month).padStart(2, '0')}-${String(v.day).padStart(2, '0')}`;
+  btn.disabled = true;
+  try {
+    const saju = Saju.calc(v), packed = Saju.pack(saju);
+    const r = await rpc('register', { p: { nickname: v.nickname.trim(), gender: v.gender, want: v.want, birth: saju.solar, mbti: v.mbti, saju: packed, kakao_id: v.kakao_id.trim() } }, jwt);
+    me = { id: r.id, token: r.token, nickname: v.nickname.trim(), mbti: v.mbti, saju: packed, kakao: true };
+    save(me); dropJwt(); show(true); scrollTo(0, 0);
+  } catch (err) { kakaoErr(err); }
+  btn.disabled = false;
+});
+
+// 카카오 로그인: Supabase가 카카오 로그인 화면으로 보냈다가 이 페이지로 돌려보낸다
+const kakaoGo = () => location.href = `${SB_URL}/auth/v1/authorize?provider=kakao&redirect_to=${encodeURIComponent(location.origin + location.pathname)}`;
+$('#kakaologin').addEventListener('click', kakaoGo);
+$('#kakaolink').addEventListener('click', kakaoGo);
+function kakaoErr(err) {
+  if (/jwt/i.test(err.message)) { dropJwt(); show(); return msg('카카오 로그인 시간이 지났어요. 다시 눌러 주세요', true); }
+  msg(err.message, true);
+}
+// 카카오에서 돌아왔을 때: 가입했던 사람이면 불러오기, 이 기기에 프로필이 있으면 카카오 계정 잇기, 아니면 가입 화면
+async function afterKakao() {
+  try {
+    if (me && !me.kakao) {
+      await rpc('link_kakao', { my_id: me.id, my_token: me.token }, jwt);
+      me.kakao = true; save(me); msg('카카오 계정을 연결했어요. 다른 폰에서도 불러올 수 있어요');
+    } else if (!me) {
+      const r = await rpc('kakao_login', {}, jwt);
+      if (r) { me = { ...r, kakao: true }; save(me); msg(`${me.nickname}님 다시 왔네요 💘`); }
+    }
+    if (me) dropJwt();
+  } catch (err) { kakaoErr(err); }
+  show();
+}
+
+// 닉네임 중복 확인: 입력을 마치면(칸을 벗어나면) 바로 알려 준다
+join.nickname.addEventListener('change', async () => {
+  const h = $('#nickhint'), n = join.nickname.value.trim();
+  if (!n) return h.hidden = true;
+  try {
+    const free = await rpc('nickname_free', { nick: n });
+    h.textContent = free ? '✅ 쓸 수 있는 닉네임이에요' : '❌ 이미 있는 닉네임이에요. 다른 닉네임을 써 주세요';
+    h.className = free ? 'hint' : 'hint error'; h.hidden = false;
+  } catch { h.hidden = true; }
+});
+
+$('#del').addEventListener('click', async () => {
+  if (!confirm('내 프로필과 연락하기 기록을 모두 삭제할까요? 되돌릴 수 없어요.')) return;
+  try { await rpc('delete_me', { my_id: me.id, my_token: me.token }); } catch (e) { return msg(e.message, true); }
+  me = null; save(null); show(); msg('삭제했어요');
+});
+
+// 개발자 탭: 오른쪽 위 투명 버튼으로 연다. 진단 정보·설정은 비밀번호를 맞혀야 보인다. 기기 열쇠(token)는 넣지 않는다
+function devInfo() {
+  let log = []; try { log = JSON.parse(localStorage.getItem(LOG) || '[]'); } catch {}
+  let type = ''; try { type = ' · ' + Saju.reading(Saju.unpack(me.saju)).type; } catch {}
+  return [
+    `SaJuTing 진단 ${new Date().toLocaleString('ko-KR')}`,
+    `배포 시각: ${document.lastModified}`,
+    `주소: ${location.href}`,
+    `브라우저: ${navigator.userAgent}`,
+    `화면: ${innerWidth}×${innerHeight}`,
+    `만세력: ${typeof Lunar === 'undefined' ? '불러오기 실패' : 'OK'}`,
+    me ? `나: ${me.nickname} · id ${me.id} · ${me.mbti || 'MBTI 모름'}${type} · 사주 ${JSON.stringify(me.saju)} · 카카오 ${me.kakao ? '연결' : '미연결'}` : `나: 가입 전 · 카카오 ${jwt ? '로그인됨' : '로그인 전'}`,
+    `추천 후보: ${cands.length}명 (매칭 ${cands.filter(c => c.kakao_id).length})`,
+    `최근 오류 ${log.length}개:`, ...(log.length ? log : ['없음']),
+  ].join('\n');
+}
+$('#devbtn').addEventListener('click', () => {                        // 오른쪽 위 투명 버튼: 개발자 칸 열고/닫기
+  const d = $('#dev'); d.hidden = !d.hidden; d.open = !d.hidden;
+  if (!d.hidden) d.scrollIntoView({ behavior: 'smooth' });
+});
+$('#dev').addEventListener('toggle', () => $('#devinfo').textContent = devInfo());
+$('#devcopy').addEventListener('click', () => copy(devInfo(), '진단 정보를 복사했어요. Claude에게 붙여 넣으세요'));
+
+// 관리자 설정: 비밀번호는 서버만 안다 (화면 코드에 없음). 처음 [열기] → 현황·설정, 다시 누르면 [저장]
+const admin = $('#admin'), F = admin.elements, KEYS = ['top', 'like_limit', 'register_limit', 'notice'];
+async function adminCall(act, val) {
+  const r = await rpc('admin', { pw: F.pw.value, act, val: val || {} });
+  if (r.error) throw new Error(r.error);
+  const t = r.stats;
+  $('#stats').textContent = `가입 ${t.profiles}명 (남 ${t.men} · 여 ${t.women}) · 24시간 새 가입 ${t.today} · 7일 내 접속 ${t.active7}` +
+    ` · 연락하기 ${t.likes}건 · 매칭 ${t.matches}쌍 · 가입 횟수 기록 ${t.register_log}건`;
+  for (const k of KEYS) F[k].value = r.settings[k] ?? '';
+  $('#adminset').hidden = false; $('#adminbtn').textContent = '저장';
+  $('#devinfo').textContent = devInfo();
+  applySettings(r.settings);
+}
+admin.addEventListener('submit', async e => {
+  e.preventDefault();
+  const saving = !$('#adminset').hidden;
+  try {
+    await adminCall(saving ? 'save' : 'stats', saving ? Object.fromEntries(KEYS.map(k => [k, k === 'notice' ? F[k].value : +F[k].value])) : null);
+    if (saving) { msg('저장했어요. 다른 사람은 새로 열 때 반영돼요'); if (me) refresh(); }
+  } catch (err) { msg(err.message, true); }
+});
+$('#resetreg').addEventListener('click', () => adminCall('reset_register').then(() => msg('가입 횟수 기록을 비웠어요'), e => msg(e.message, true)));
+
+jwt ? afterKakao() : show();
+</script>
+</body>
+</html>
