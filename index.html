@@ -473,7 +473,9 @@ function kakaoShare(card) {
       objectType: 'feed',
       content: { title: card.title, description: card.description,
                  imageUrl: new URL('icon-512.png', BASE).href, imageWidth: 512, imageHeight: 512, link },
-      buttons: [{ title: card.button, link }],
+      // 사주 공유: [공유된 사주 보기](친구 사주) + [연애 사주 보러 가기](첫 화면에서 내 것 해 보기). 카톡 카드 버튼은 최대 2개
+      buttons: card.url ? [{ title: '공유된 사주 보기', link }, { title: card.button, link: { mobileWebUrl: BASE, webUrl: BASE } }]
+                        : [{ title: card.button, link }],
     });
     return true;
   } catch (e) { logErr('카카오 공유 실패: ' + e.message); return false; }
