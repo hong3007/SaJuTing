@@ -34,6 +34,8 @@ header h1 { font: 26px/1.1 var(--display); margin: 0; background: linear-gradien
 header small, .muted, .hint { color: var(--muted); }
 #kakaologin { background: #fee500; color: #191919; box-shadow: 0 5px 0 #d9c300; }   /* 카카오 로그인 버튼 (카카오 노란색) */
 #start > b { font: 20px var(--display); color: var(--purple); }
+.credit { margin: 36px 4px 0; text-align: right; font-size: 11px; color: var(--muted); }   /* 맨 아래 구석: 개발자·라이선스 */
+.credit a { color: inherit; }
 a.chat { display: block; margin: 16px 0 0; padding: 13px; border-radius: 999px; background: #fee500; color: #191919; box-shadow: 0 5px 0 #d9c300;
   font: 17px var(--display); text-align: center; text-decoration: none; }   /* [오픈채팅 들어가기] */
 button.special { background: linear-gradient(120deg, #a78bfa, #ff5fa2, #ffb020, #a78bfa); background-size: 300% 100%; box-shadow: 0 5px 0 #8b5cf6;
@@ -211,6 +213,8 @@ addEventListener('unhandledrejection', e => logErr(String(e.reason?.message || e
       <button id="adminbtn">열기</button>
     </form>
   </details>
+  <footer class="credit">© 2026 SaJuTing · 만든 이 말복이코드방앗간 ·
+    <a href="https://github.com/hong3007/SaJuTing/blob/main/LICENSE" target="_blank" rel="noopener">모든 권리 보유</a></footer>
   <div id="msg" role="status" aria-live="polite"></div>
 </main>
 
