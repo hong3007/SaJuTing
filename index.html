@@ -219,6 +219,7 @@ addEventListener('unhandledrejection', e => logErr(String(e.reason?.message || e
         <pre id="devinfo"></pre>
         <button type="button" class="ghost" id="devcopy">진단 정보 복사</button>
         <p id="stats" class="read" style="margin-top:14px"></p>
+        <div id="recent" class="read"></div>
         <div class="row">
           <div><label>추천 인원 (TOP)</label><input name="top" type="number" min="1" max="50"></div>
           <div><label>하루 연락하기 한도</label><input name="like_limit" type="number" min="1" max="200"></div>
@@ -640,7 +641,13 @@ async function adminCall(act, val) {
   if (r.error) throw new Error(r.error);
   const t = r.stats;
   $('#stats').textContent = `가입 ${t.profiles}명 (남 ${t.men} · 여 ${t.women}) · 24시간 새 가입 ${t.today} · 7일 내 접속 ${t.active7}` +
-    ` · 연락하기 ${t.likes}건 · 매칭 ${t.matches}쌍 · 가입 횟수 기록 ${t.register_log}건`;
+    ` · 연락하기 ${t.likes}건 · 매칭 ${t.matches}쌍 (누적 ${t.match_log ?? '-'}) · 오픈채팅 열어 줌 ${t.chat_open ?? '-'} · 링크 신고 ${t.chat_report ?? '-'}` +
+    ` · 카카오 로그인 기록 ${t.auth_users ?? '-'} · 가입 횟수 기록 ${t.register_log}건` +
+    (t.db_bytes ? ` · 용량 ${(t.db_bytes / 1048576).toFixed(1)}MB / 500MB (${(t.db_bytes / 5242880).toFixed(1)}%)` : '');
+  const day = d => new Date(d).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  $('#recent').innerHTML = (r.recent || []).length ? '<b>최근 가입 (최대 20명)</b><ul>' + r.recent.map(p =>
+    `<li>${esc(p.nickname)} · ${p.gender === 'F' ? '여' : '남'} · ${new Date().getFullYear() - p.birth_year}살 · ${esc(p.region || '-')} · ${esc(p.mbti || 'MBTI 모름')}${p.has_chat ? ' · 💬' : ''}
+      <small class="muted">가입 ${day(p.created_at)} · 접속 ${day(p.last_seen)}</small></li>`).join('') + '</ul>' : '';
   for (const k of KEYS) F[k].value = r.settings[k] ?? '';
   $('#adminset').hidden = false; $('#adminbtn').textContent = '저장';
   $('#devinfo').textContent = devInfo();
