@@ -36,7 +36,7 @@ header small, .muted, .hint { color: var(--muted); }
 fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
 #hero .big { display: block; font: 24px/1.35 var(--display); color: var(--purple); margin: 4px 0 8px; }
 #start > b, #join > b { font: 20px var(--display); color: var(--purple); }
-.credit { margin: 36px 4px 0; text-align: right; font-size: 11px; color: var(--muted); }   /* 맨 아래 구석: 개발자·라이선스 */
+.credit { margin: 36px 4px 0; text-align: right; font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* 맨 아래 구석 한 줄: 저작권(라이선스 링크)·문의 메일 */
 .credit a { color: inherit; }
 a.chat { display: block; margin: 16px 0 0; padding: 13px; border-radius: 999px; background: #fee500; color: #191919; box-shadow: 0 5px 0 #d9c300;
   font: 17px var(--display); text-align: center; text-decoration: none; }   /* [오픈채팅 들어가기] */
@@ -230,9 +230,8 @@ addEventListener('unhandledrejection', e => logErr(String(e.reason?.message || e
       <button id="adminbtn">열기</button>
     </form>
   </details>
-  <footer class="credit">© 2026 SaJuTing · 만든 이 말복이코드방앗간 ·
-    문의 <a href="mailto:seohong81@naver.com">seohong81@naver.com</a> ·
-    <a href="https://github.com/hong3007/SaJuTing/blob/main/LICENSE" target="_blank" rel="noopener">모든 권리 보유</a></footer>
+  <footer class="credit"><a href="https://github.com/hong3007/SaJuTing/blob/main/LICENSE" target="_blank" rel="noopener" title="모든 권리 보유 (라이선스)">© 2026 말복이코드방앗간</a> ·
+    <a href="mailto:seohong81@naver.com" title="개발자 문의">seohong81@naver.com</a></footer>
   <div id="msg" role="status" aria-live="polite"></div>
 </main>
 
