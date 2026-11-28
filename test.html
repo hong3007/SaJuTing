@@ -34,6 +34,12 @@ header h1 { font: 26px/1.1 var(--display); margin: 0; background: linear-gradien
 header small, .muted, .hint { color: var(--muted); }
 #kakaologin { background: #fee500; color: #191919; box-shadow: 0 5px 0 #d9c300; }   /* 카카오 로그인 버튼 (카카오 노란색) */
 #start > b { font: 20px var(--display); color: var(--purple); }
+a.chat { display: block; margin: 16px 0 0; padding: 13px; border-radius: 999px; background: #fee500; color: #191919; box-shadow: 0 5px 0 #d9c300;
+  font: 17px var(--display); text-align: center; text-decoration: none; }   /* [오픈채팅 들어가기] */
+button.special { background: linear-gradient(120deg, #a78bfa, #ff5fa2, #ffb020, #a78bfa); background-size: 300% 100%; box-shadow: 0 5px 0 #8b5cf6;
+  animation: shine 4s linear infinite; }                              /* ✨[오픈채팅 열어 주기] (여성 쪽만 보이는 특별 버튼) */
+@keyframes shine { to { background-position: 300% 0; } }
+@media (prefers-reduced-motion: reduce) { button.special { animation: none; } }
 #devbtn { flex: none; width: 44px; height: 44px; margin: 0 0 0 auto; padding: 0; background: none; box-shadow: none; opacity: 0; cursor: default; }  /* 숨은 개발자 버튼 (오른쪽 위 빈 곳) */
 .hint { font-size: 13px; margin: 8px 0 0; }
 h2 { font: 20px/1.3 var(--display); margin: 28px 4px 10px; color: var(--purple); }
@@ -162,16 +168,25 @@ addEventListener('unhandledrejection', e => logErr(String(e.reason?.message || e
       <div><label>출생지</label><select name="place"></select></div>
       <div><label>MBTI</label><select name="mbti"><option value="">모름</option></select></div>
     </div>
-    <label>카카오톡 ID</label>
-    <input name="kakao_id" required maxlength="40" autocapitalize="off" autocomplete="off" spellcheck="false">
-    <p class="hint">서로 [연락하기]를 누른 사람에게만 공개돼요. 카카오톡 설정에서 'ID 검색 허용'을 켜 두세요.</p>
     <label class="check"><input type="checkbox" required> 만 19세 이상입니다.</label>
-    <label class="check"><input type="checkbox" required> 닉네임·성별·출생연도·사주 결과·MBTI·카카오톡 ID를 추천과 매칭에만 쓰는 데 동의합니다. 생년월일과 시각은 저장하지 않고, 카카오 계정은 로그인에만 쓰며, 삭제하면 바로 지워집니다. 30일 동안 접속하지 않으면 자동으로 삭제됩니다.</label>
+    <label class="check"><input type="checkbox" required> 닉네임·성별·출생연도·사주 결과·MBTI·오픈채팅 링크와 참여코드를 추천과 매칭에만 쓰는 데 동의합니다. 생년월일과 시각은 저장하지 않고, 카카오 계정은 로그인에만 쓰며, 삭제하면 바로 지워집니다. 30일 동안 접속하지 않으면 자동으로 삭제됩니다.</label>
     <button>가입하고 추천 보기 💘</button>
   </form>
 
   <section id="home" hidden>
     <details class="card" id="mine"></details>
+    <details class="card" id="mychat" hidden>
+      <summary><b>💬 내 오픈채팅 링크</b> <small class="error" id="chatwarn"></small></summary>
+      <form id="chatform">
+        <p class="hint">매칭된 사람 중 내가 ✨[오픈채팅 열어 주기]를 누른 사람에게만 공개돼요. 만들기: 카카오톡 → 채팅 탭 오른쪽 위 💬 → 오픈채팅 → 1:1 채팅방 만들기 → 링크 복사. 공유 글을 통째로 붙여 넣어도 링크만 골라 저장해요.</p>
+        <label>1:1 오픈채팅 링크</label>
+        <input name="chat_url" required autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="https://open.kakao.com/o/...">
+        <label>참여코드 (선택, 추천)</label>
+        <input name="chat_code" maxlength="20" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="방에 건 참여코드">
+        <p class="hint">참여코드를 걸어 두면 링크가 퍼져도 모르는 사람은 못 들어와요. 언제든 여기서 바꿀 수 있어요.</p>
+        <button>저장</button>
+      </form>
+    </details>
     <div id="list"></div>
     <button type="button" class="link" id="kakaolink" hidden>카카오 계정 연결하기 (다른 폰에서 불러오기용)</button>
     <button type="button" class="link" id="del">내 정보 삭제</button>
@@ -257,15 +272,27 @@ const reasonsHtml = rs => '<ul>' + rs.map(r =>
 
 function item(c) {
   const m = c.m;
-  const badge = c.kakao_id ? '' : c.likes_me ? '<span class="badge on">나에게 연락하기를 눌렀어요</span>'
+  const badge = c.matched ? '' : c.likes_me ? '<span class="badge on">나에게 연락하기를 눌렀어요</span>'
     : c.liked_by_me ? `<span class="badge">연락하기 보냄<button class="x" data-act="unlike" data-i="${c.i}" aria-label="연락하기 취소" title="연락하기 취소">✕</button></span>` : '';
-  const action = c.kakao_id
-    ? `<div class="kakao">카카오톡 ID<br><b>${esc(c.kakao_id)}</b></div>
-       <div class="row"><button class="ghost" data-act="copy" data-i="${c.i}">ID 복사</button><button data-act="share" data-i="${c.i}">궁합 공유하기</button></div>
-       <p class="hint">카카오톡 → 친구 추가 → ID로 추가에 붙여 넣고, [궁합 공유하기]로 결과를 보내며 대화를 시작해 보세요.</p>`
-    : c.liked_by_me ? '<p class="hint">상대도 [연락하기]를 누르면 카카오톡 ID가 열려요. 14일 동안 답이 없으면 사라지고 다시 보낼 수 있어요. 마음이 바뀌면 위의 ✕로 취소해요.</p>'
+  const share = `<button data-act="share" data-i="${c.i}">궁합 공유하기</button>`;
+  // 매칭 후 연락: 여성 쪽(같은 성별끼리면 둘 다)이 ✨[오픈채팅 열어 주기]를 눌러야 상대에게 링크가 보인다
+  const theirs = c.chat_url
+    ? `<div class="kakao">💬 상대가 오픈채팅을 열어 줬어요${c.chat_code ? `<br>참여코드 <b>${esc(c.chat_code)}</b>` : ''}</div>
+       <a class="chat" href="${esc(c.chat_url)}" target="_blank" rel="noopener" data-code="${esc(c.chat_code || '')}">오픈채팅 들어가기</a>
+       ${c.chat_code ? '<p class="hint">참여코드는 [오픈채팅 들어가기]를 누를 때 복사돼요. 들어갈 때 붙여 넣으세요.</p>' : ''}
+       ${c.reported ? '<p class="hint">링크가 안 열린다고 알렸어요. 상대가 고치면 여기에 새 링크가 떠요.</p>'
+         : `<button type="button" class="link" data-act="report" data-i="${c.i}">링크가 안 열려요</button>`}`
+    : c.kakao_id                                                       // 옛 가입자 (카톡 ID로 가입)
+    ? `<div class="kakao">카카오톡 ID<br><b>${esc(c.kakao_id)}</b></div><button class="ghost" data-act="copy" data-i="${c.i}">ID 복사</button>`
+    : c.can_open ? '' : '<p class="hint">💌 매칭 성공! 상대가 오픈채팅을 열어 주면 여기에 [오픈채팅 들어가기]가 떠요.</p>';
+  const mine = !c.can_open ? ''
+    : c.opened_by_me ? '<p class="hint">💬 내 오픈채팅을 열어 줬어요. 상대가 들어오길 기다려요.</p>'
+    : `<button class="special" data-act="open" data-i="${c.i}">✨ 오픈채팅 열어 주기</button>
+       <p class="hint">열어 줘야 상대가 연락할 수 있어요. 열어 줄지는 내가 정해요 😎</p>`;
+  const action = c.matched ? theirs + mine + share
+    : c.liked_by_me ? '<p class="hint">상대도 [연락하기]를 누르면 매칭돼요. 14일 동안 답이 없으면 사라지고 다시 보낼 수 있어요. 마음이 바뀌면 위의 ✕로 취소해요.</p>'
     : `<button data-act="like" data-i="${c.i}">연락하기 💌</button>`;
-  return `<details class="card item"${c.kakao_id ? ' open' : ''}>
+  return `<details class="card item"${c.matched ? ' open' : ''}>
     <summary><span class="rank">${c.i + 1}</span>
       <span class="who"><b>${esc(c.nickname)}</b><small>${esc(c.birth_year)}년생 · ${esc(c.mbti || 'MBTI 모름')}</small>${badge}</span>
       <span class="score">${m.total}</span></summary>
@@ -301,17 +328,23 @@ const settings = rpc('get_settings', {}).then(applySettings, () => {});  // 못 
 async function refresh() {
   list.innerHTML = '<p class="muted">불러오는 중…</p>';
   await settings;
-  let rows;
-  try { rows = await rpc('candidates', { my_id: me.id, my_token: me.token }); }
+  let rows, mc;
+  try { [rows, mc] = await Promise.all([rpc('candidates', { my_id: me.id, my_token: me.token }), rpc('my_chat', { my_id: me.id, my_token: me.token })]); }
   catch (e) { list.innerHTML = `<p class="error">${esc(e.message)}</p>`; return; }
+  // 내 오픈채팅 링크: 없거나(옛 가입자) 매칭 상대가 안 열린다고 알렸으면 펼쳐서 알려 준다
+  const cf = $('#chatform');
+  cf.chat_url.value = mc.chat_url || ''; cf.chat_code.value = mc.chat_code || '';
+  $('#mychat').hidden = !(mc.gender === 'F' || mc.gender === mc.want);  // 오픈채팅을 열어 주는 쪽에만 보인다
+  $('#chatwarn').textContent = mc.reports ? `매칭된 ${mc.reports}명이 링크가 안 열린대요. 새로 만들어 고쳐 주세요` : '';
+  if (mc.reports) $('#mychat').open = true;
   const mine = { saju: Saju.unpack(me.saju), mbti: me.mbti };
   cands = rows.flatMap(r => {                                         // 다른 사람이 보낸 사주 값은 unpack에서 검사
     try { const saju = Saju.unpack(r.saju); return [{ ...r, saju, m: Saju.match(mine, { saju, mbti: r.mbti }) }]; } catch { return []; }
   }).sort((a, b) => b.m.total - a.m.total);
   cands.forEach((c, i) => c.i = i);
-  const matched = cands.filter(c => c.kakao_id);
-  const top = cands.filter(c => !c.kakao_id && c.i < TOP);
-  const more = cands.filter(c => !c.kakao_id && c.i >= TOP && (c.likes_me || c.liked_by_me));
+  const matched = cands.filter(c => c.matched);
+  const top = cands.filter(c => !c.matched && c.i < TOP);
+  const more = cands.filter(c => !c.matched && c.i >= TOP && (c.likes_me || c.liked_by_me));
   list.innerHTML = (matched.length ? `<h2>💞 매칭 성공 ${matched.length}</h2>` + matched.map(item).join('') : '') +
     `<h2>✨ 궁합 TOP ${TOP}</h2>` +
     (top.length ? top.map(item).join('') : '<p class="muted">아직 추천할 사람이 없어요. 링크를 친구에게 알려 주세요!</p>') +
@@ -380,6 +413,8 @@ async function copy(text, done) {
 }
 
 list.addEventListener('click', async e => {
+  const a = e.target.closest('a[data-code]');                         // [오픈채팅 열기]: 참여코드를 복사하고 링크로 간다
+  if (a?.dataset.code) { navigator.clipboard?.writeText(a.dataset.code).catch(() => {}); msg('참여코드를 복사했어요. 들어갈 때 붙여 넣으세요'); }
   const b = e.target.closest('button[data-act]'); if (!b) return;
   e.preventDefault();                                                 // ✕는 카드 제목줄 안에 있어서 카드가 열리고 닫히지 않게
   const c = cands[b.dataset.i];
@@ -387,17 +422,32 @@ list.addEventListener('click', async e => {
   if (b.dataset.act === 'share') return share(matchCard(c), '궁합 결과를 복사했어요. 카카오톡 대화창에 붙여 넣으세요');
   b.disabled = true;
   try {
+    if (b.dataset.act === 'open') {
+      pendingOpen = c;                                                // 링크가 없으면 저장할 때 이어서 열어 준다
+      await rpc('open_chat', { my_id: me.id, my_token: me.token, target: c.id });
+      pendingOpen = null; msg(`${c.nickname}님에게 오픈채팅을 열어 줬어요 ✨`);
+      return await refresh();
+    }
+    if (b.dataset.act === 'report') {
+      await rpc('report_chat', { my_id: me.id, my_token: me.token, target: c.id });
+      msg('상대에게 링크를 고쳐 달라고 알렸어요');
+      return await refresh();
+    }
     if (b.dataset.act === 'unlike') {
       await rpc('unlike_profile', { my_id: me.id, my_token: me.token, target: c.id });
       msg('연락하기를 취소했어요. 상대 화면에서도 사라져요');
       return await refresh();
     }
     const matched = await rpc('like_profile', { my_id: me.id, my_token: me.token, target: c.id });
-    msg(matched ? '매칭 성공! 카카오톡 ID가 열렸어요' : '연락하기를 보냈어요. 상대도 누르면 카카오톡 ID가 열려요');
+    msg(matched ? '매칭 성공! 💞' : '연락하기를 보냈어요. 상대도 누르면 매칭돼요');
     if (matched) rpc('get_settings', {}).then(applySettings, () => {});   // 첫 화면 매칭 수 올리기
     await refresh();
   } catch (err) {
-    msg(err.message, true);
+    if (/오픈채팅 링크/.test(err.message)) {                            // 링크가 아직 없음 → 링크 칸을 열어 준다
+      msg(`내 오픈채팅 링크를 저장하면 ${c.nickname}님에게 바로 열려요`);
+      b.disabled = false; $('#mychat').open = true; $('#mychat').scrollIntoView({ behavior: 'smooth' }); return $('#chatform').chat_url.focus();
+    }
+    pendingOpen = null; msg(err.message, true);
     if (me) await refresh();                                          // 상대가 탈퇴했으면 목록에서 빠진다
   }
 });
@@ -423,10 +473,29 @@ join.addEventListener('submit', async e => {
   btn.disabled = true;
   try {
     const saju = Saju.calc(v), packed = Saju.pack(saju);
-    const r = await rpc('register', { p: { nickname: v.nickname.trim(), gender: v.gender, want: v.want, birth: saju.solar, mbti: v.mbti, saju: packed, kakao_id: v.kakao_id.trim() } }, jwt);
+    const r = await rpc('register', { p: { nickname: v.nickname.trim(), gender: v.gender, want: v.want, birth: saju.solar, mbti: v.mbti, saju: packed } }, jwt);
     me = { id: r.id, token: r.token, nickname: v.nickname.trim(), mbti: v.mbti, saju: packed, kakao: true };
     save(me); dropJwt(); show(true); scrollTo(0, 0);
   } catch (err) { kakaoErr(err); }
+  btn.disabled = false;
+});
+
+// 오픈채팅 링크: 카톡 공유 글("오픈채팅 '닉' https://open.kakao.com/o/...")을 통째로 붙여 넣어도 링크만 골라낸다. 모양이 틀리면 서버가 거절
+let pendingOpen = null;
+const chatUrl = t => ((t || '').match(/https?:\/\/open\.kakao\.com\/o\/[A-Za-z0-9]+/) || [(t || '').trim()])[0].replace(/^http:/, 'https:');
+$('#chatform').addEventListener('submit', async e => {
+  e.preventDefault();
+  const f = e.target, btn = f.querySelector('button');
+  btn.disabled = true;
+  try {
+    await rpc('set_chat', { my_id: me.id, my_token: me.token, url: chatUrl(f.chat_url.value), code: f.chat_code.value.trim() });
+    msg('오픈채팅 링크를 저장했어요');
+    if (pendingOpen) {                                                // ✨[오픈채팅 열어 주기]를 누르고 링크를 넣은 경우: 이어서 열어 준다
+      await rpc('open_chat', { my_id: me.id, my_token: me.token, target: pendingOpen.id });
+      msg(`${pendingOpen.nickname}님에게 오픈채팅을 열어 줬어요 ✨`); pendingOpen = null;
+    }
+    $('#mychat').open = false; await refresh();
+  } catch (err) { msg(err.message, true); }
   btn.disabled = false;
 });
 
@@ -482,7 +551,7 @@ function devInfo() {
     `화면: ${innerWidth}×${innerHeight}`,
     `만세력: ${typeof Lunar === 'undefined' ? '불러오기 실패' : 'OK'}`,
     me ? `나: ${me.nickname} · id ${me.id} · ${me.mbti || 'MBTI 모름'}${type} · 사주 ${JSON.stringify(me.saju)} · 카카오 ${me.kakao ? '연결' : '미연결'}` : `나: 가입 전 · 카카오 ${jwt ? '로그인됨' : '로그인 전'}`,
-    `추천 후보: ${cands.length}명 (매칭 ${cands.filter(c => c.kakao_id).length})`,
+    `추천 후보: ${cands.length}명 (매칭 ${cands.filter(c => c.matched).length})`,
     `최근 오류 ${log.length}개:`, ...(log.length ? log : ['없음']),
   ].join('\n');
 }
