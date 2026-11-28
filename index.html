@@ -151,6 +151,9 @@ addEventListener('unhandledrejection', e => logErr(String(e.reason?.message || e
     <p id="mSay"></p>
   </section>
 
+  <!-- 공유받은 링크(?f=사주)로 들어오면 그 친구의 연애 사주를 보여 준다 -->
+  <details class="card" id="friend" open hidden></details>
+
   <!-- 첫 화면 (2026-11-28 사용자 요청, 벤치마킹): 처음 온 사람은 [지금 해 보기], 이미 가입한 사람은 [이미 계정이 있어요] → 카카오 → 내 화면 -->
   <section id="hero" class="card" hidden>
     <b class="big">내 연애 사주,<br>생일만 넣으면 바로 나와요 🔮</b>
@@ -401,26 +404,48 @@ function show(justJoined) {
   mine.hidden = !(me || peek);
   if (mine.hidden) return;
   const saju = me ? Saju.unpack(me.saju) : peek.saju, mbti = me ? me.mbti : peek.mbti;
+  const v = sajuView(saju, mbti, false);
+  mine.innerHTML = `<summary class="nickbox"><span class="emoji">${v.nick.emoji}</span><b class="nick">${esc(v.nick.text)}</b>
+      <small class="muted">${me ? esc(me.nickname) + '님의' : '내'} 연애 사주 · 오늘 <span class="stars">${star(v.fs[2].stars)}</span> · 눌러서 보기</small></summary>
+    <button type="button" class="ghost" id="myshare">내 연애 사주 공유하기 💌</button>${v.body}`;
+  if (justJoined) mine.open = true;
+  myCard = { title: `${me ? me.nickname + '님은' : '나는'} ${v.nick.emoji} ${v.nick.text}`, description: `올해 연애운 ${star(v.fs[0].stars)} · ${v.rd.type}`,
+             button: '연애 사주 보러 가기', lines: [v.rd.tmi], url: friendUrl(saju, mbti, me?.nickname) };
+  if (me) refresh();
+}
+const star = n => '★'.repeat(n) + '☆'.repeat(5 - n);
+// 연애 사주 풀이 본문. 내 것과 공유받은 친구 것(friend=true)이 같이 쓴다
+function sajuView(saju, mbti, friend) {
   const rd = Saju.reading(saju), lis = a => '<ul class="plain">' + a.map(t => `<li>${esc(t)}</li>`).join('') + '</ul>';
   const per = Saju.periods();
   const fs = ['year', 'month', 'day'].map(k => Saju.fortune(saju, per[k], k));
-  const star = n => '★'.repeat(n) + '☆'.repeat(5 - n);
   const nick = Saju.nickname(saju, fs[0].stars);
-  mine.innerHTML = `<summary class="nickbox"><span class="emoji">${nick.emoji}</span><b class="nick">${esc(nick.text)}</b>
-      <small class="muted">${me ? esc(me.nickname) + '님의' : '내'} 연애 사주 · 오늘 <span class="stars">${star(fs[2].stars)}</span> · 눌러서 보기</small></summary>
-    <button type="button" class="ghost" id="myshare">내 연애 사주 공유하기 💌</button>
-    ${fs.map(f => `<h3>${esc(f.title)} 연애운 <span class="stars">${star(f.stars)}</span></h3>${lis(f.lines)}`).join('')}
-    <h3>나는 어떤 사람? <small class="muted">${esc(rd.type)}</small></h3><p class="read">${esc(rd.me)}</p><p class="read">${esc(rd.tmi)}</p>
+  const body = `${fs.map(f => `<h3>${esc(f.title)} 연애운 <span class="stars">${star(f.stars)}</span></h3>${lis(f.lines)}`).join('')}
+    <h3>${friend ? '어떤' : '나는 어떤'} 사람? <small class="muted">${esc(rd.type)}</small></h3><p class="read">${esc(rd.me)}</p><p class="read">${esc(rd.tmi)}</p>
     <h3>연애 스타일</h3>${lis(rd.style)}
     <h3>이런 사람 만나야 함</h3>${lis(rd.meet)}
     <p class="hint">⚠️ ${esc(rd.avoid)}</p>
-    <p class="hint">추천 목록 사주 칸 색으로 상대 기운 확인 가능: 초록 목 · 빨강 화 · 노랑 토 · 회색 금 · 파랑 수. 재미로 보는 풀이임!</p>
-    <h3>내 사주 8글자 <small class="muted">${esc(mbti || 'MBTI 모름')}</small></h3>${pillarsHtml(saju)}`;
-  if (justJoined) mine.open = true;
-  myCard = { title: `${me ? me.nickname + '님은' : '나는'} ${nick.emoji} ${nick.text}`, description: `올해 연애운 ${star(fs[0].stars)} · ${rd.type}`,
-             button: '내 연애 사주 보기', lines: [rd.tmi] };
-  if (me) refresh();
+    <p class="hint">${friend ? '' : '추천 목록 사주 칸 색으로 상대 기운 확인 가능: 초록 목 · 빨강 화 · 노랑 토 · 회색 금 · 파랑 수. '}재미로 보는 풀이임!</p>
+    <h3>${friend ? '' : '내 '}사주 8글자 <small class="muted">${esc(mbti || 'MBTI 모름')}</small></h3>${pillarsHtml(saju)}`;
+  return { rd, fs, nick, body };
 }
+// 공유 링크: ?f=사주 글자 번호(36진수 한 글자씩) &m=MBTI &n=닉네임. 생년월일 자체는 넣지 않는다
+const BASE = location.origin + location.pathname;
+const friendUrl = (saju, mbti, name) => BASE + '?f=' + Saju.pack(saju).flat().map(n => n.toString(36)).join('') +
+  (mbti ? '&m=' + mbti : '') + (name ? '&n=' + encodeURIComponent(name) : '');
+(() => {                                                              // 받은 링크로 들어왔으면 친구 사주를 맨 위에 펼쳐 보여 준다
+  try {
+    const q = new URLSearchParams(location.search), f = q.get('f') || '';
+    if (!/^(?:[0-9ab]{2}){3,4}$/.test(f)) return;
+    const d = [...f].map(c => parseInt(c, 36)), saju = Saju.unpack(d.flatMap((n, i) => i % 2 ? [] : [[n, d[i + 1]]]));
+    const mbti = /^[EI][NS][TF][JP]$/.test(q.get('m')) ? q.get('m') : '', name = (q.get('n') || '').trim().slice(0, 20);
+    const v = sajuView(saju, mbti, true), box = $('#friend');
+    box.innerHTML = `<summary class="nickbox"><span class="emoji">${v.nick.emoji}</span><b class="nick">${esc(v.nick.text)}</b>
+        <small class="muted">${name ? esc(name) + '님의' : '친구의'} 연애 사주 · 오늘 <span class="stars">${star(v.fs[2].stars)}</span></small></summary>${v.body}
+      <p class="hint">👇 내 연애 사주도 생일만 넣으면 바로 나와요</p>`;
+    box.hidden = false;
+  } catch {}                                                          // 잘못된 링크면 그냥 첫 화면
+})();
 let myCard, peek = null, trying = false;                              // peek: 가입 전 미리보기 { s, saju, mbti }, trying: [지금 해 보기]를 누름
 $('#mine').addEventListener('click', e => { if (e.target.id === 'myshare') share(myCard, '내 연애 사주를 복사했어요. 카카오톡 대화창에 붙여 넣으세요'); });
 
@@ -432,7 +457,7 @@ const matchCard = c => {
 // 카톡 카드 → 폰 공유 창 → 복사 순서로 시도
 function share(card, copied) {
   if (kakaoShare(card)) return;
-  const text = ['SaJuTing ' + card.title, ...card.lines, location.origin + location.pathname].join('\n');
+  const text = ['SaJuTing ' + card.title, ...card.lines, card.url || BASE].join('\n');
   if (navigator.share) return navigator.share({ text }).catch(() => {});
   return copy(text, copied);
 }
@@ -443,11 +468,11 @@ function kakaoShare(card) {
   try {
     if (!window.Kakao) return false;
     if (!Kakao.isInitialized()) Kakao.init(KAKAO_KEY);
-    const url = location.origin + location.pathname, link = { mobileWebUrl: url, webUrl: url };
+    const url = card.url || BASE, link = { mobileWebUrl: url, webUrl: url };
     Kakao.Share.sendDefault({
       objectType: 'feed',
       content: { title: card.title, description: card.description,
-                 imageUrl: new URL('icon-512.png', url).href, imageWidth: 512, imageHeight: 512, link },
+                 imageUrl: new URL('icon-512.png', BASE).href, imageWidth: 512, imageHeight: 512, link },
       buttons: [{ title: card.button, link }],
     });
     return true;
