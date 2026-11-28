@@ -315,6 +315,6 @@
     return { total, saju, mbti };
   }
 
-  const api = { calc, match, reading, nickname, periods, fortune, pack, unpack, PLACES, EL, ZHI_EL, W };
+  const api = { calc, match, reading, nickname, iljuIndex, periods, fortune, pack, unpack, PLACES, EL, ZHI_EL, W };
   if (typeof module === 'object') module.exports = api; else root.Saju = api;
 })(this);

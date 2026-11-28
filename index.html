@@ -284,20 +284,27 @@ function dropJwt() { jwt = null; try { sessionStorage.removeItem(JWT); } catch {
 async function rpc(fn, body, token) {
   const headers = { apikey: KEY, 'Content-Type': 'application/json' };
   if (token) headers.Authorization = 'Bearer ' + token;
-  const r = await fetch(SB + fn, { method: 'POST', headers, body: JSON.stringify(body), keepalive: true });  // keepalive: 페이지를 떠나도 보냄
+  const r = await fetch(SB + fn, { method: 'POST', headers, body: JSON.stringify(body) });
   const j = await r.json().catch(() => null);
   if (r.ok) return j;
   if (/다시 가입/.test(j?.message)) { me = null; save(null); show(); }  // 서버에 내 프로필이 없음 → 가입 화면으로
   throw new Error(j?.message || `서버 오류 (${r.status})`);
 }
 // 로그인 안 한 사람도 세는 하루 집계 (숫자만). 실패해도 화면에는 영향 없음
-const hit = k => rpc('hit', { k }).catch(() => {});
+// keepalive: 카카오 로그인으로 페이지를 떠나는 순간에도 보냄 (집계에만 씀)
+const hit = k => fetch(SB + 'hit', { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ k }), keepalive: true }).catch(() => {});
+// 같은 브라우저에서 하루 한 번만 센다 (새로고침·다시 누르기로 숫자가 부풀지 않게). 저장소를 못 쓰면 그냥 센다
+function once(k) {
+  try {
+    const d = new Date().toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' });
+    if (localStorage.getItem('sajuting.hit.' + k) === d) return false;
+    localStorage.setItem('sajuting.hit.' + k, d);
+  } catch {}
+  return true;
+}
 // 결과 통계: 나온 일주(60갑자 순번)와 MBTI만 센다. 생일·사주 8글자는 보내지 않는다
-const hitResult = p => { const { g, z } = p.saju.pillars[2]; hit('ilju:' + ((6 * g - 5 * z) % 60 + 60) % 60); if (p.mbti) hit('mbti:' + p.mbti); };
-try {                                                                 // 방문은 브라우저당 하루 한 번만
-  const d = new Date().toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' });
-  if (localStorage.getItem('sajuting.visit') !== d) { localStorage.setItem('sajuting.visit', d); hit('visit'); }
-} catch {}
+const hitResult = p => { const { g, z } = p.saju.pillars[2]; hit('ilju:' + Saju.iljuIndex(g, z)); if (p.mbti) hit('mbti:' + p.mbti); };
+if (once('visit')) hit('visit');
 function load() { try { return JSON.parse(localStorage.getItem(STORE)); } catch { return null; } }
 function save(v) { try { v ? localStorage.setItem(STORE, JSON.stringify(v)) : localStorage.removeItem(STORE); } catch {} }
 function msg(text, bad) {
@@ -437,7 +444,7 @@ function sajuView(saju, mbti, friend) {
     <h3>${friend ? '' : '내 '}사주 8글자 <small class="muted">${esc(mbti || 'MBTI 모름')}</small></h3>${pillarsHtml(saju)}`;
   return { rd, fs, nick, body };
 }
-// 공유 링크: ?f=사주 글자 번호(36진수 한 글자씩) &m=MBTI &n=닉네임. 생년월일 자체는 넣지 않는다
+// 공유 링크: ?f=사주 글자 번호(36진수 한 글자씩) &m=MBTI &n=닉네임. 생년월일 숫자는 안 넣지만 사주 글자로 날짜를 거꾸로 짐작할 수는 있다 (본인이 공유할 때만 만들어짐)
 const BASE = location.origin + location.pathname;
 const friendUrl = (saju, mbti, name) => BASE + '?f=' + Saju.pack(saju).flat().map(n => n.toString(36)).join('') +
   (mbti ? '&m=' + mbti : '') + (name ? '&n=' + encodeURIComponent(name) : '');
@@ -446,12 +453,14 @@ const friendUrl = (saju, mbti, name) => BASE + '?f=' + Saju.pack(saju).flat().ma
     const q = new URLSearchParams(location.search), f = q.get('f') || '';
     if (!/^(?:[0-9ab]{2}){3,4}$/.test(f)) return;
     const d = [...f].map(c => parseInt(c, 36)), saju = Saju.unpack(d.flatMap((n, i) => i % 2 ? [] : [[n, d[i + 1]]]));
-    const mbti = /^[EI][NS][TF][JP]$/.test(q.get('m')) ? q.get('m') : '', name = (q.get('n') || '').trim().slice(0, 20);
+    const mbti = /^[EI][NS][TF][JP]$/.test(q.get('m')) ? q.get('m') : '', name = (q.get('n') || '').trim();
+    const nameOk = /^[\p{L}\p{N} _.-]{1,20}$/u.test(name);           // 닉네임처럼 생긴 것만 (가짜 공지 같은 문구 막기)
     const v = sajuView(saju, mbti, true), box = $('#friend');
     box.innerHTML = `<summary class="nickbox"><span class="emoji">${v.nick.emoji}</span><b class="nick">${esc(v.nick.text)}</b>
-        <small class="muted">${name ? esc(name) + '님의' : '친구의'} 연애 사주 · 오늘 <span class="stars">${star(v.fs[2].stars)}</span></small></summary>${v.body}
+        <small class="muted">${nameOk ? esc(name) + '님이 공유한' : '공유받은'} 연애 사주 · 오늘 <span class="stars">${star(v.fs[2].stars)}</span></small></summary>${v.body}
       <p class="hint">👇 내 연애 사주도 생일만 넣으면 바로 나와요</p>`;
-    box.hidden = false; hit('friend');
+    box.hidden = false; if (once('friend')) hit('friend');
+    history.replaceState(null, '', location.pathname);               // 새로고침하면 내 화면으로 (친구 카드가 계속 붙어 있지 않게)
   } catch {}                                                          // 잘못된 링크면 그냥 첫 화면
 })();
 let myCard, peek = null, trying = false;                              // peek: 가입 전 미리보기 { s, saju, mbti }, trying: [지금 해 보기]를 누름
@@ -571,7 +580,7 @@ join.addEventListener('submit', async e => {
   let p; try { p = peekOf(v); } catch (err) { return msg(err.message, true); }
   try { localStorage.setItem(DRAFT, JSON.stringify(Object.fromEntries(BIRTH.map(k => [k, join[k].value])))); } catch {}
   if (!jwt) {                                                         // 가입 전: 내 연애 사주부터 보여 주고 [카카오로 시작하기]로 이어 준다
-    peek = p; show(); $('#mine').open = true; hit('peek'); hitResult(p); $('#mine').scrollIntoView({ behavior: 'smooth' });
+    peek = p; show(); $('#mine').open = true; if (once('peek')) { hit('peek'); hitResult(p); } $('#mine').scrollIntoView({ behavior: 'smooth' });
     return;
   }
   btn.disabled = true;
@@ -695,7 +704,7 @@ async function adminCall(act, val) {
     ` · 연락하기 ${t.likes}건 · 매칭 ${t.matches}쌍 (누적 ${t.match_log ?? '-'}) · 오픈채팅 열어 줌 ${t.chat_open ?? '-'} · 링크 신고 ${t.chat_report ?? '-'}` +
     ` · 카카오 로그인 기록 ${t.auth_users ?? '-'} · 가입 횟수 기록 ${t.register_log}건` +
     (t.db_bytes ? ` · 용량 ${(t.db_bytes / 1048576).toFixed(1)}MB / 500MB (${(t.db_bytes / 5242880).toFixed(1)}%)` : '') +
-    (r.hits ? '\n로그인 없이 집계 (오늘 / 누적): ' + [['visit', '방문'], ['peek', '연애 사주 봄'], ['share', '공유'], ['friend', '공유 링크로 들어옴'], ['login', '카카오 버튼']]
+    (r.hits ? '\n로그인 없이 집계 (오늘 / 누적): ' + [['visit', '방문'], ['peek', '연애 사주 봄'], ['share', '공유 버튼'], ['friend', '공유 링크로 들어옴'], ['login', '카카오 버튼']]
       .map(([k, name]) => `${name} ${r.hits[k]?.today ?? 0} / ${r.hits[k]?.total ?? 0}`).join(' · ') +
       top('많이 나온 일주', 'ilju:', i => '갑을병정무기경신임계'[i % 10] + '자축인묘진사오미신유술해'[i % 12]) + top('MBTI', 'mbti:', x => x) : '');
   const day = d => new Date(d).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: '2-digit' });
