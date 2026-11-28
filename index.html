@@ -231,7 +231,7 @@ addEventListener('unhandledrejection', e => logErr(String(e.reason?.message || e
       <div id="adminset" hidden>
         <pre id="devinfo"></pre>
         <button type="button" class="ghost" id="devcopy">진단 정보 복사</button>
-        <p id="stats" class="read" style="margin-top:14px"></p>
+        <p id="stats" class="read" style="margin-top:14px;white-space:pre-line"></p>
         <div id="recent" class="read"></div>
         <div class="row">
           <div><label>추천 인원 (TOP)</label><input name="top" type="number" min="1" max="50"></div>
@@ -284,12 +284,18 @@ function dropJwt() { jwt = null; try { sessionStorage.removeItem(JWT); } catch {
 async function rpc(fn, body, token) {
   const headers = { apikey: KEY, 'Content-Type': 'application/json' };
   if (token) headers.Authorization = 'Bearer ' + token;
-  const r = await fetch(SB + fn, { method: 'POST', headers, body: JSON.stringify(body) });
+  const r = await fetch(SB + fn, { method: 'POST', headers, body: JSON.stringify(body), keepalive: true });  // keepalive: 페이지를 떠나도 보냄
   const j = await r.json().catch(() => null);
   if (r.ok) return j;
   if (/다시 가입/.test(j?.message)) { me = null; save(null); show(); }  // 서버에 내 프로필이 없음 → 가입 화면으로
   throw new Error(j?.message || `서버 오류 (${r.status})`);
 }
+// 로그인 안 한 사람도 세는 하루 집계 (숫자만). 실패해도 화면에는 영향 없음
+const hit = k => rpc('hit', { k }).catch(() => {});
+try {                                                                 // 방문은 브라우저당 하루 한 번만
+  const d = new Date().toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' });
+  if (localStorage.getItem('sajuting.visit') !== d) { localStorage.setItem('sajuting.visit', d); hit('visit'); }
+} catch {}
 function load() { try { return JSON.parse(localStorage.getItem(STORE)); } catch { return null; } }
 function save(v) { try { v ? localStorage.setItem(STORE, JSON.stringify(v)) : localStorage.removeItem(STORE); } catch {} }
 function msg(text, bad) {
@@ -443,7 +449,7 @@ const friendUrl = (saju, mbti, name) => BASE + '?f=' + Saju.pack(saju).flat().ma
     box.innerHTML = `<summary class="nickbox"><span class="emoji">${v.nick.emoji}</span><b class="nick">${esc(v.nick.text)}</b>
         <small class="muted">${name ? esc(name) + '님의' : '친구의'} 연애 사주 · 오늘 <span class="stars">${star(v.fs[2].stars)}</span></small></summary>${v.body}
       <p class="hint">👇 내 연애 사주도 생일만 넣으면 바로 나와요</p>`;
-    box.hidden = false;
+    box.hidden = false; hit('friend');
   } catch {}                                                          // 잘못된 링크면 그냥 첫 화면
 })();
 let myCard, peek = null, trying = false;                              // peek: 가입 전 미리보기 { s, saju, mbti }, trying: [지금 해 보기]를 누름
@@ -456,6 +462,7 @@ const matchCard = c => {
 };
 // 카톡 카드 → 폰 공유 창 → 복사 순서로 시도
 function share(card, copied) {
+  hit('share');
   if (kakaoShare(card)) return;
   const text = ['SaJuTing ' + card.title, ...card.lines, card.url || BASE].join('\n');
   if (navigator.share) return navigator.share({ text }).catch(() => {});
@@ -562,7 +569,7 @@ join.addEventListener('submit', async e => {
   let p; try { p = peekOf(v); } catch (err) { return msg(err.message, true); }
   try { localStorage.setItem(DRAFT, JSON.stringify(Object.fromEntries(BIRTH.map(k => [k, join[k].value])))); } catch {}
   if (!jwt) {                                                         // 가입 전: 내 연애 사주부터 보여 주고 [카카오로 시작하기]로 이어 준다
-    peek = p; show(); $('#mine').open = true; $('#mine').scrollIntoView({ behavior: 'smooth' });
+    peek = p; show(); $('#mine').open = true; hit('peek'); $('#mine').scrollIntoView({ behavior: 'smooth' });
     return;
   }
   btn.disabled = true;
@@ -600,6 +607,7 @@ $('#chatform').addEventListener('submit', async e => {
 // 카카오 로그인: Supabase가 카카오 로그인 화면으로 보냈다가 이 페이지로 돌려보낸다
 function kakaoGo() {
   try { localStorage.setItem(KAKAO_GO, Date.now()); } catch {}       // 내가 시작한 로그인 표시 (위 jwt 참고)
+  hit('login');
   location.href = `${SB_URL}/auth/v1/authorize?provider=kakao&redirect_to=${encodeURIComponent(location.origin + location.pathname)}`;
 }
 $('#kakaologin').addEventListener('click', kakaoGo);
@@ -680,7 +688,9 @@ async function adminCall(act, val) {
   $('#stats').textContent = `가입 ${t.profiles}명 (남 ${t.men} · 여 ${t.women}) · 24시간 새 가입 ${t.today} · 7일 내 접속 ${t.active7}` +
     ` · 연락하기 ${t.likes}건 · 매칭 ${t.matches}쌍 (누적 ${t.match_log ?? '-'}) · 오픈채팅 열어 줌 ${t.chat_open ?? '-'} · 링크 신고 ${t.chat_report ?? '-'}` +
     ` · 카카오 로그인 기록 ${t.auth_users ?? '-'} · 가입 횟수 기록 ${t.register_log}건` +
-    (t.db_bytes ? ` · 용량 ${(t.db_bytes / 1048576).toFixed(1)}MB / 500MB (${(t.db_bytes / 5242880).toFixed(1)}%)` : '');
+    (t.db_bytes ? ` · 용량 ${(t.db_bytes / 1048576).toFixed(1)}MB / 500MB (${(t.db_bytes / 5242880).toFixed(1)}%)` : '') +
+    (r.hits ? '\n로그인 없이 집계 (오늘 / 누적): ' + [['visit', '방문'], ['peek', '연애 사주 봄'], ['share', '공유'], ['friend', '공유 링크로 들어옴'], ['login', '카카오 버튼']]
+      .map(([k, name]) => `${name} ${r.hits[k]?.today ?? 0} / ${r.hits[k]?.total ?? 0}`).join(' · ') : '');
   const day = d => new Date(d).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: '2-digit' });
   $('#recent').innerHTML = (r.recent || []).length ? '<b>최근 가입 (최대 20명)</b><ul>' + r.recent.map(p =>
     `<li>${esc(p.nickname)} · ${p.gender === 'F' ? '여' : '남'} · ${new Date().getFullYear() - p.birth_year}살 · ${esc(p.region || '-')} · ${esc(p.mbti || 'MBTI 모름')}${p.has_chat ? ' · 💬' : ''}
