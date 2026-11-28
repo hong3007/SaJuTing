@@ -32,8 +32,8 @@ header { display: flex; align-items: center; gap: 10px; margin: 4px 0 18px; }
 header img { width: 44px; height: 44px; filter: drop-shadow(0 3px 0 var(--shadow)); }
 header h1 { font: 26px/1.1 var(--display); margin: 0; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 header small, .muted, .hint { color: var(--muted); }
-#kakaologin { background: #fee500; color: #191919; box-shadow: 0 5px 0 #d9c300; }   /* 카카오 로그인 버튼 (카카오 노란색) */
-#start > b { font: 20px var(--display); color: var(--purple); }
+#kakaologin, .kakao-btn { background: #fee500; color: #191919; box-shadow: 0 5px 0 #d9c300; }   /* 카카오 로그인 버튼 (카카오 노란색) */
+#start > b, #kakaolink > b { font: 20px var(--display); color: var(--purple); }
 .credit { margin: 36px 4px 0; text-align: right; font-size: 11px; color: var(--muted); }   /* 맨 아래 구석: 개발자·라이선스 */
 .credit a { color: inherit; }
 a.chat { display: block; margin: 16px 0 0; padding: 13px; border-radius: 999px; background: #fee500; color: #191919; box-shadow: 0 5px 0 #d9c300;
@@ -176,6 +176,11 @@ addEventListener('unhandledrejection', e => logErr(String(e.reason?.message || e
   </form>
 
   <section id="home" hidden>
+    <div class="card" id="kakaolink" hidden>
+      <b>🔑 카카오 계정을 연결해 주세요</b>
+      <p class="hint">카카오 로그인 전에 가입하셨어요. 연결하지 않으면 폰을 바꾸거나 브라우저 기록을 지웠을 때 내 프로필을 다시 불러올 수 없어요.</p>
+      <button type="button" class="kakao-btn">카카오 계정 연결하기</button>
+    </div>
     <details class="card" id="mine"></details>
     <details class="card" id="mychat" hidden>
       <summary><b>💬 내 오픈채팅 링크</b> <small class="error" id="chatwarn"></small></summary>
@@ -190,7 +195,6 @@ addEventListener('unhandledrejection', e => logErr(String(e.reason?.message || e
       </form>
     </details>
     <div id="list"></div>
-    <button type="button" class="link" id="kakaolink" hidden>카카오 계정 연결하기 (다른 폰에서 불러오기용)</button>
     <button type="button" class="link" id="del">내 정보 삭제</button>
     <p class="hint" style="text-align:center">30일 동안 접속하지 않으면 프로필이 자동으로 삭제돼요.</p>
   </section>
@@ -506,7 +510,7 @@ $('#chatform').addEventListener('submit', async e => {
 // 카카오 로그인: Supabase가 카카오 로그인 화면으로 보냈다가 이 페이지로 돌려보낸다
 const kakaoGo = () => location.href = `${SB_URL}/auth/v1/authorize?provider=kakao&redirect_to=${encodeURIComponent(location.origin + location.pathname)}`;
 $('#kakaologin').addEventListener('click', kakaoGo);
-$('#kakaolink').addEventListener('click', kakaoGo);
+$('#kakaolink button').addEventListener('click', kakaoGo);
 function kakaoErr(err) {
   if (/jwt/i.test(err.message)) { dropJwt(); show(); return msg('카카오 로그인 시간이 지났어요. 다시 눌러 주세요', true); }
   msg(err.message, true);
