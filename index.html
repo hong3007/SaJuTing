@@ -292,6 +292,8 @@ async function rpc(fn, body, token) {
 }
 // 로그인 안 한 사람도 세는 하루 집계 (숫자만). 실패해도 화면에는 영향 없음
 const hit = k => rpc('hit', { k }).catch(() => {});
+// 결과 통계: 나온 일주(60갑자 순번)와 MBTI만 센다. 생일·사주 8글자는 보내지 않는다
+const hitResult = p => { const { g, z } = p.saju.pillars[2]; hit('ilju:' + ((6 * g - 5 * z) % 60 + 60) % 60); if (p.mbti) hit('mbti:' + p.mbti); };
 try {                                                                 // 방문은 브라우저당 하루 한 번만
   const d = new Date().toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' });
   if (localStorage.getItem('sajuting.visit') !== d) { localStorage.setItem('sajuting.visit', d); hit('visit'); }
@@ -569,7 +571,7 @@ join.addEventListener('submit', async e => {
   let p; try { p = peekOf(v); } catch (err) { return msg(err.message, true); }
   try { localStorage.setItem(DRAFT, JSON.stringify(Object.fromEntries(BIRTH.map(k => [k, join[k].value])))); } catch {}
   if (!jwt) {                                                         // 가입 전: 내 연애 사주부터 보여 주고 [카카오로 시작하기]로 이어 준다
-    peek = p; show(); $('#mine').open = true; hit('peek'); $('#mine').scrollIntoView({ behavior: 'smooth' });
+    peek = p; show(); $('#mine').open = true; hit('peek'); hitResult(p); $('#mine').scrollIntoView({ behavior: 'smooth' });
     return;
   }
   btn.disabled = true;
@@ -685,12 +687,17 @@ async function adminCall(act, val) {
   const r = await rpc('admin', { pw: F.pw.value, act, val: val || {} });
   if (r.error) throw new Error(r.error);
   const t = r.stats;
+  const top = (title, pre, name) => {                                 // 결과 통계 TOP 10 (누적)
+    const rows = Object.entries(r.hits || {}).filter(([k]) => k.startsWith(pre)).sort((a, b) => b[1].total - a[1].total).slice(0, 10);
+    return rows.length ? `\n${title} (누적 TOP 10): ` + rows.map(([k, v]) => `${name(k.slice(pre.length))} ${v.total}`).join(' · ') : '';
+  };
   $('#stats').textContent = `가입 ${t.profiles}명 (남 ${t.men} · 여 ${t.women}) · 24시간 새 가입 ${t.today} · 7일 내 접속 ${t.active7}` +
     ` · 연락하기 ${t.likes}건 · 매칭 ${t.matches}쌍 (누적 ${t.match_log ?? '-'}) · 오픈채팅 열어 줌 ${t.chat_open ?? '-'} · 링크 신고 ${t.chat_report ?? '-'}` +
     ` · 카카오 로그인 기록 ${t.auth_users ?? '-'} · 가입 횟수 기록 ${t.register_log}건` +
     (t.db_bytes ? ` · 용량 ${(t.db_bytes / 1048576).toFixed(1)}MB / 500MB (${(t.db_bytes / 5242880).toFixed(1)}%)` : '') +
     (r.hits ? '\n로그인 없이 집계 (오늘 / 누적): ' + [['visit', '방문'], ['peek', '연애 사주 봄'], ['share', '공유'], ['friend', '공유 링크로 들어옴'], ['login', '카카오 버튼']]
-      .map(([k, name]) => `${name} ${r.hits[k]?.today ?? 0} / ${r.hits[k]?.total ?? 0}`).join(' · ') : '');
+      .map(([k, name]) => `${name} ${r.hits[k]?.today ?? 0} / ${r.hits[k]?.total ?? 0}`).join(' · ') +
+      top('많이 나온 일주', 'ilju:', i => '갑을병정무기경신임계'[i % 10] + '자축인묘진사오미신유술해'[i % 12]) + top('MBTI', 'mbti:', x => x) : '');
   const day = d => new Date(d).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: '2-digit' });
   $('#recent').innerHTML = (r.recent || []).length ? '<b>최근 가입 (최대 20명)</b><ul>' + r.recent.map(p =>
     `<li>${esc(p.nickname)} · ${p.gender === 'F' ? '여' : '남'} · ${new Date().getFullYear() - p.birth_year}살 · ${esc(p.region || '-')} · ${esc(p.mbti || 'MBTI 모름')}${p.has_chat ? ' · 💬' : ''}
